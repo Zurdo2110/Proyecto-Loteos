@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lotes del Proyecto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1">Sistema de Gestión Parcelaria</span>
+            <a href="/loteos" class="btn btn-outline-light btn-sm">Volver a Loteos</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-3 mb-1">
+                    <h2 class="text-primary m-0">{{loteo.nombre}}</h2>
+                    <a href="/loteos/{{loteo.idLoteo}}/editar" class="btn btn-outline-warning btn-sm">✏️ Editar Nombre</a>
+                    <form action="/loteos/{{loteo.idLoteo}}/eliminar" method="post" class="m-0" onsubmit="return confirm('ATENCIÓN: Borrar este proyecto eliminará TODAS las parcelas. ¿Estás seguro?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Eliminar Loteo</button>
+                    </form>
+                </div>
+                <p class="text-muted m-0">Gestión de parcelas y cuentas</p>
+            </div>
+            <a href="/loteos/{{loteo.idLoteo}}/lotes/nuevo" class="btn btn-success fw-bold">+ Nuevo Lote</a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                
+                <form action="/loteos/{{loteo.idLoteo}}/lotes" method="get" class="mb-3">
+                    <div class="input-group shadow-sm">
+                        <input type="text" name="buscar" class="form-control" placeholder="Buscar cuenta o titular..." value="{{#buscar}}{{buscar}}{{/buscar}}">
+                        <button class="btn btn-primary" type="submit">🔍</button>
+                        {{#buscar}}
+                            <a href="/loteos/{{loteo.idLoteo}}/lotes" class="btn btn-outline-secondary">X</a>
+                        {{/buscar}}
+                    </div>
+                </form>
+
+                <div class="list-group shadow-sm" style="max-height: 65vh; overflow-y: auto;">
+                    {{#lotes}}
+                    <a href="/loteos/{{loteo.idLoteo}}/lotes?idLoteSeleccionado={{idLote}}{{#buscar}}&buscar={{buscar}}{{/buscar}}" 
+                       class="list-group-item list-group-item-action py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong class="text-dark">Cta: {{numeroCuenta}}</strong>
+                            <span class="badge bg-secondary" style="font-size: 0.7em;">{{estado}}</span>
+                        </div>
+                        <small class="text-muted d-block text-truncate">Titular: {{titular}}</small>
+                    </a>
+                    {{/lotes}}
+                    
+                    {{^lotes}}
+                    <div class="alert alert-warning p-2 text-center text-muted small m-0">
+                        No se encontraron parcelas.
+                    </div>
+                    {{/lotes}}
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                
+                {{#loteSeleccionado}}
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Detalle de Parcela</h4>
+                        <span class="badge bg-light text-dark fs-6">{{estado}}</span>
+                    </div>
+                    
+                    <div class="card-body fs-6">
+                        <div class="row mb-2">
+                            <div class="col-sm-3 text-muted fw-bold">N° de Cuenta:</div>
+                            <div class="col-sm-9 fs-5 text-dark fw-bold">{{numeroCuenta}}</div>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row mb-2">
+                            <div class="col-sm-3 text-muted fw-bold">Titular:</div>
+                            <div class="col-sm-9">{{titular}}</div>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row mb-2">
+                            <div class="col-sm-3 text-muted fw-bold">Nomenclatura:</div>
+                            <div class="col-sm-9">{{nomenclatura}}</div>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row mb-2">
+                            <div class="col-sm-3 text-muted fw-bold">Superficie:</div>
+                            <div class="col-sm-9">{{superficie}} m²</div>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row mb-2">
+                            <div class="col-sm-3 text-muted fw-bold">Observaciones:</div>
+                            <div class="col-sm-9">{{observaciones}}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer text-end bg-white d-flex justify-content-end gap-2 p-3">
+                        <a href="/lotes/{{idLote}}/editar" class="btn btn-warning">Modificar Datos</a>
+                        <form action="/lotes/{{idLote}}/eliminar" method="post" class="m-0" onsubmit="return confirm('¿Estás seguro de que querés borrar esta parcela definitivamente?');">
+                            <button type="submit" class="btn btn-danger">Eliminar Parcela</button>
+                        </form>
+                    </div>
+                </div>
+                {{/loteSeleccionado}}
+
+                {{^loteSeleccionado}}
+                <div class="card border-1 border-dashed shadow-none h-100 d-flex align-items-center justify-content-center bg-transparent" style="min-height: 400px;">
+                    <div class="text-center text-muted">
+                        <h1 class="display-3 opacity-25">📋</h1>
+                        <h5>Seleccioná una cuenta de la lista</h5>
+                        <p>Los detalles de la parcela aparecerán acá.</p>
+                    </div>
+                </div>
+                {{/loteSeleccionado}}
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

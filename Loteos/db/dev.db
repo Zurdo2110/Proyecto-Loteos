@@ -1,0 +1,17 @@
+-- 1. Crear la tabla de Loteos (Simplificada)
+CREATE TABLE loteos (
+    id_loteo INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+-- 2. Crear la tabla de Lotes
+CREATE TABLE lotes (
+    id_lote INT AUTO_INCREMENT PRIMARY KEY,
+    id_loteo INT NOT NULL,
+    numero_cuenta VARCHAR(50) NOT NULL,
+    nomenclatura VARCHAR(100),
+    superficie DECIMAL(10, 2),
+    estado VARCHAR(50),
+    observaciones TEXT,
+    FOREIGN KEY (id_loteo) REFERENCES loteos(id_loteo) ON DELETE CASCADE
+);
