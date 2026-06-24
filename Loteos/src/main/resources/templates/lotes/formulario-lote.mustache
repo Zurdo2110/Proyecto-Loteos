@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Lote</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white">
+                        <h4 class="mb-0">Registrar Lote en: {{loteo.nombre}}</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/loteos/{{loteo.idLoteo}}/lotes" method="post">
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="numeroCuenta" class="form-label fw-bold">Número de Cuenta</label>
+                                    <input type="text" class="form-control" id="numeroCuenta" name="numeroCuenta" 
+                                        required pattern="\d{12}" maxlength="12" minlength="12" 
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                                        title="La cuenta debe tener exactamente 12 números"
+                                        placeholder="Ej: 123456789012">
+                                    <div class="form-text">Debe contener exactamente 12 números.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="nomenclatura" class="form-label fw-bold">Nomenclatura</label>
+                                    <input type="text" class="form-control" id="nomenclatura" name="nomenclatura" 
+                                        required pattern="\d{16}" maxlength="16" minlength="16" 
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                                        title="La nomenclatura debe tener exactamente 16 números"
+                                        placeholder="16 dígitos numéricos">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="titular" class="form-label fw-bold">Titular / Propietario</label>
+                                    <input type="text" class="form-control" id="titular" name="titular" placeholder="Nombre completo">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="designacionOficial" class="form-label fw-bold">Designación Oficial</label>
+                                    <input type="text" class="form-control" id="designacionOficial" name="designacionOficial" placeholder="Ej: Lote 1, Manzana A">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="superficie" class="form-label fw-bold">Superficie Total (m²)</label>
+                                    <input type="number" step="0.01" class="form-control" id="superficie" name="superficie">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="superficieCubierta" class="form-label fw-bold">Superficie Cubierta (m²)</label>
+                                    <input type="number" step="0.01" class="form-control" id="superficieCubierta" name="superficieCubierta">
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label for="estado" class="form-label fw-bold">Estado</label>
+                                    <select class="form-select" id="estado" name="estado">
+                                        <option value=\"Sin iniciar\">Sin iniciar</option>
+                                        <option value=\"En proceso\">En proceso</option>
+                                        <option value=\"Aprobado\">Aprobado</option>
+                                        <option value=\"Observado\">Observado</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="observaciones" class="form-label fw-bold">Observaciones</label>
+                                    <textarea class="form-control" id="observaciones" name="observaciones" rows="1"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="/loteos/{{loteo.idLoteo}}/lotes" class="btn btn-outline-secondary">Cancelar</a>
+                                <button type="submit" class="btn btn-success fw-bold">Guardar Parcela</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

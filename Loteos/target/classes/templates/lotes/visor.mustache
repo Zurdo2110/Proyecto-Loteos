@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visor Interactivo - {{loteo.nombre}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        /* El contenedor principal ocupa el alto disponible de la pantalla */
+        .contenedor-visor {
+            height: calc(100vh - 90px); /* Descuenta la barra superior */
+        }
+        #mapa {
+            height: 100%;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .panel-lateral {
+            height: 100%;
+            overflow-y: auto; /* Si hay mucha info, permite scroll */
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-dark mb-3 shadow-sm">
+        <div class="container-fluid px-4 d-flex justify-content-between">
+            <span class="navbar-brand mb-0 h1">🗺️ Visor Parcelario Profesional</span>
+            <a href="/loteos/{{loteo.idLoteo}}/lotes" class="btn btn-outline-light btn-sm">Volver a la Lista</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        <div class="row contenedor-visor g-3">
+            
+            <div class="col-md-8 col-lg-9">
+                <div id="mapa" class="shadow-sm"></div>
+            </div>
+            
+            <div class="col-md-4 col-lg-3">
+                <div id="panel-detalle" class="card shadow-sm h-100 border-0">
+                    <div class="card-header bg-secondary text-white fw-bold py-3">
+                        📋 Información de la Parcela
+                    </div>
+                    <div class="card-body panel-lateral d-flex flex-column justify-content-between">
+                        
+                        <div id="mensaje-ayuda" class="text-center text-muted my-auto">
+                            <p class="fs-1 mb-2">🖱️</p>
+                            <h6>Seleccioná un lote en el mapa</h6>
+                            <p class="small text-secondary">Hacé clic sobre cualquier polígono para inspeccionar sus datos catastrales y estado.</p>
+                        </div>
+
+                        <div id="datos-lote" class="d-none">
+                            <div class="mb-4 text-center">
+                                <span class="badge bg-success fs-6 p-2 w-100" id="txt-estado">Disponible</span>
+                            </div>
+                            
+                            <table class="table table-sm table-striped border-top">
+                                border-top
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" class="text-muted w-50">N° de Cuenta:</th>
+                                        <td id="lbl-cuenta" class="fw-bold text-primary">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="text-muted">Loteo:</th>
+                                        <td>{{loteo.nombre}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="text-muted">Nomenclatura:</th>
+                                        <td id="lbl-nomenclatura" class="text-secondary">Próximamente...</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="text-muted">Superficie:</th>
+                                        <td id="lbl-superficie" class="text-secondary">Consultando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="alert alert-info small mt-3" role="alert">
+                                💡 <strong>Dato de Gabinete:</strong> Este polígono proviene de la cartografía georreferenciada del estudio.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Inicializar mapa
+        var map = L.map('mapa');
+
+        // Fondo de calles tradicional
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 20
+        }).addTo(map);
+
+        // --- DISEÑO DE ESTILOS PARA EL REMARCADO ---
+        // Estilo estándar de los lotes (Rojo fino)
+        var estiloEstandar = {
+            color: "#dc3545",
+            weight: 1.5,
+            fillColor: "#dc3545",
+            fillOpacity: 0.15
+        };
+
+        // Estilo de selección (Azul grueso y brillante)
+        var estiloSeleccionado = {
+            color: "#0d6efd",
+            weight: 3.5,
+            fillColor: "#0d6efd",
+            fillOpacity: 0.4
+        };
+
+        // Variable global para recordar qué lote está seleccionado actualmente
+        var capaSeleccionada = null;
+        var capaLotesGeoJson = null; // Guardará la referencia global de toda la capa
+
+        // Cargar el GeoJSON
+        fetch('/mapas/loteo-loma-alta-sur.geojson')
+            .then(response => response.json())
+            .then(data => {
+                capaLotesGeoJson = L.geoJSON(data, {
+                    style: estiloEstandar,
+                    onEachFeature: function (feature, layer) {
+                        
+                        // Evento al hacer clic en cada polígono
+                        layer.on('click', function(e) {
+                            
+                           // 1. Remarcado visual (Mantiene el color azul en el seleccionado)
+                            if (capaSeleccionada !== null) {
+                                capaLotesGeoJson.resetStyle(capaSeleccionada);
+                            }
+                            layer.setStyle(estiloSeleccionado);
+                            layer.bringToFront();
+                            capaSeleccionada = layer;
+
+                            // 2. Agramos el número de cuenta del polígono
+                            var cuenta = feature.properties.cuenta;
+
+                            if (cuenta) {
+                                // Hacemos la consulta en silencio a la base de datos de Spring Boot
+                                fetch('/api/lotes/' + cuenta)
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error("El lote existe en el plano pero no está cargado en la Base de Datos.");
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(lote => {
+                                        // Ocultamos el mensaje de ayuda y mostramos el panel de datos
+                                        document.getElementById('mensaje-ayuda').classList.add('d-none');
+                                        document.getElementById('datos-lote').classList.remove('d-none');
+
+                                        // Inyectamos los datos reales de PostgreSQL en la tabla
+                                        document.getElementById('lbl-cuenta').innerText = lote.numeroCuenta;
+                                        document.getElementById('lbl-nomenclatura').innerText = lote.nomenclatura ? lote.nomenclatura : "Sin asignar";
+                                        document.getElementById('lbl-superficie').innerText = lote.superficie + " m²";
+                                        
+                                        // Modificamos el Badge de estado dinámicamente según la BD (Disponible / Vendido)
+                                        var badgeEstado = document.getElementById('txt-estado');
+                                        badgeEstado.innerText = lote.estado;
+                                        
+                                        if (lote.estado === 'Vendido') {
+                                            badgeEstado.className = "badge bg-danger fs-6 p-2 w-100";
+                                        } else if (lote.estado === 'Reservado') {
+                                            badgeEstado.className = "badge bg-warning text-dark fs-6 p-2 w-100";
+                                        } else {
+                                            badgeEstado.className = "badge bg-success fs-6 p-2 w-100";
+                                        }
+                                    })
+                                    .catch(error => {
+                                        alert(error.message);
+                                    });
+                            } else {
+                                alert("Este polígono no tiene configurado el atributo 'cuenta' en el GeoJSON.");
+                            }
+                        });
+
+                    }
+                }).addTo(map);
+
+                // --- LÓGICA DE BÚSQUEDA DESDE LA LISTA ---
+                
+                // 1. Leemos si vino algún número de cuenta en la URL de la página
+                var parametrosUrl = new URLSearchParams(window.location.search);
+                var cuentaBuscada = parametrosUrl.get('cuenta');
+                var loteEncontrado = false;
+
+                if (cuentaBuscada) {
+                    console.log("Buscando la cuenta que vino de la lista:", cuentaBuscada); // Mensaje espía
+                    
+                    capaLotesGeoJson.eachLayer(function(layer) {
+                        // Agarramos el dato del plano. Si es nulo o no existe, lo ignoramos.
+                        var cuentaPlano = layer.feature.properties.cuenta;
+                        
+                        if (cuentaPlano) {
+                            // Convertimos los dos obligatoriamente a texto (String) para que coincidan perfecto
+                            if (String(cuentaPlano) === String(cuentaBuscada)) {
+                                
+                                // ¡Encontrado! Hacemos el vuelo de cámara
+                                map.fitBounds(layer.getBounds(), { maxZoom: 19 });
+                                
+                                // Simulamos el clic
+                                layer.fire('click');
+                                
+                                loteEncontrado = true;
+                            }
+                        }
+                    });
+                }
+
+                // Si no se buscó nada (entró desde el botón normal) o si la cuenta de la BD no está dibujada en QGIS:
+                if (!loteEncontrado) {
+                    // Si no encontró nada, centra todo el loteo
+                    map.fitBounds(capaLotesGeoJson.getBounds());
+                    if (cuentaBuscada) {
+                        alert("Atención: La cuenta '" + cuentaBuscada + "' está en la base de datos, pero no se encontró en el dibujo del mapa.");
+                    }
+                }
+            })
+            .catch(error => console.error("Error crítico al renderizar el mapa:", error));
+    </script>
+</body>
+</html>
