@@ -2,51 +2,48 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ingreso - Gestión Parcelaria</title>
+    <title>Ingreso - Portal de Agrimensura</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* Un pequeño truco para que el fondo gris ocupe el 100% de la altura de la pantalla */
-        body, html { height: 100%; background-color: #f8f9fa; }
-    </style>
 </head>
-<body class="d-flex align-items-center justify-content-center">
+<body class="bg-light d-flex align-items-center" style="height: 100vh;">
 
-    <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
-        <div class="card-header bg-dark text-white text-center py-4">
-            <h4 class="mb-0">Gestión Parcelaria</h4>
-            <small class="opacity-75">Acceso al sistema</small>
-        </div>
-        
-        <div class="card-body p-4">
-            
-            {{#error}}
-            <div class="alert alert-danger py-2 text-center" role="alert">
-                {{error}}
-            </div>
-            {{/error}}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h3 class="text-primary fw-bold">🗺️ Portal de Clientes</h3>
+                        <p class="text-muted">Ingrese sus credenciales para ver el avance del proyecto</p>
+                    </div>
 
-            {{#mensaje}}
-            <div class="alert alert-success py-2 text-center" role="alert">
-                {{mensaje}}
-            </div>
-            {{/mensaje}}
+                    {{#error}}
+                        <div class="alert alert-danger p-2 text-center">{{error}}</div>
+                    {{/error}}
+                    {{#mensaje}}
+                        <div class="alert alert-success p-2 text-center">{{mensaje}}</div>
+                    {{/mensaje}}
 
-            <form action="/login" method="post">
-                <div class="mb-3">
-                    <label for="username" class="form-label fw-bold text-muted">Usuario</label>
-                    <input type="text" class="form-control form-control-lg" id="username" name="username" required autofocus>
+                    <form action="/login" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Usuario</label>
+                            <input type="text" name="username" class="form-control" placeholder="Ej: boehler" required autofocus>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Contraseña</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold">Ingresar al Sistema</button>
+                        </div>
+                    </form>
+                    
                 </div>
-                
-                <div class="mb-4">
-                    <label for="password" class="form-label fw-bold text-muted">Contraseña</label>
-                    <input type="password" class="form-control form-control-lg" id="password" name="password" required>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">Ingresar</button>
-            </form>
-            
+            </div>
         </div>
     </div>
+</div>
 
 </body>
 </html>

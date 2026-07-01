@@ -14,13 +14,15 @@ import java.util.List;
 @Repository
 public interface LoteRepository extends JpaRepository<Lote, Integer> {
     
-    // El método que ya tenías
-    List<Lote> findByLoteoIdLoteo(Integer idLoteo);
 
-    // El buscador nuevo (busca coincidencias en cuenta o en titular, ignorando mayúsculas)
+    List<Lote> findByLoteoIdLoteo(Integer idLoteo);
+    List<Lote> findByEtapaIdEtapa(Integer idEtapa);
+
     @Query("SELECT l FROM Lote l WHERE l.loteo.idLoteo = :loteoId AND (LOWER(l.numeroCuenta) LIKE LOWER(CONCAT('%', :termino, '%')) OR LOWER(l.titular) LIKE LOWER(CONCAT('%', :termino, '%')))")
     List<Lote> buscarPorCuentaOTitular(@Param("loteoId") Integer loteoId, @Param("termino") String termino);
 
-    // Spring Boot arma la consulta a PostgreSQL de forma automática solo con leer este nombre:
+    @Query("SELECT l FROM Lote l WHERE l.etapa.idEtapa = :idEtapa AND (LOWER(l.numeroCuenta) LIKE LOWER(CONCAT('%', :buscar, '%')) OR LOWER(l.titular) LIKE LOWER(CONCAT('%', :buscar, '%')))")
+    List<Lote> buscarPorEtapaYTermino(@Param("idEtapa") Integer idEtapa, @Param("buscar") String buscar);
+
     Optional<Lote> findByNumeroCuenta(String numeroCuenta);
 }

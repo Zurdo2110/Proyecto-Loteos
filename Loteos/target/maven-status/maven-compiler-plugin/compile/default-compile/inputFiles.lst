@@ -2,7 +2,12 @@
 /home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/config/SecurityConfig.java
 /home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/controllers/AuthController.java
 /home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/controllers/LoteoController.java
+/home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/models/Etapa.java
 /home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/models/Lote.java
 /home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/models/Loteo.java
+/home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/models/Usuario.java
+/home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/repositories/EtapaRepository.java
 /home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/repositories/LoteRepository.java
 /home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/repositories/LoteoRepository.java
+/home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/repositories/UsuarioRepository.java
+/home/zurdo/Estudio/Proyecto-Loteos/Loteos/src/main/java/com/example/app/services/UserDetailsServiceImpl.java

@@ -30,7 +30,7 @@
     <nav class="navbar navbar-dark bg-dark mb-3 shadow-sm">
         <div class="container-fluid px-4 d-flex justify-content-between">
             <span class="navbar-brand mb-0 h1">🗺️ Visor Parcelario Profesional</span>
-            <a href="/loteos/{{loteo.idLoteo}}/lotes" class="btn btn-outline-light btn-sm">Volver a la Lista</a>
+            <a href="/cliente/loteos/{{loteo.idLoteo}}/lotes{{#etapaSeleccionada}}?idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}" class="btn btn-outline-light btn-sm">Volver a la Lista</a>
         </div>
     </nav>
 
@@ -50,33 +50,40 @@
                         
                         <div id="mensaje-ayuda" class="text-center text-muted my-auto">
                             <p class="fs-1 mb-2">🖱️</p>
-                            <h6>Seleccioná un lote en el mapa</h6>
+                            <h6>Seleccioná un lote en el plano</h6>
                             <p class="small text-secondary">Hacé clic sobre cualquier polígono para inspeccionar sus datos catastrales y estado.</p>
                         </div>
 
                         <div id="datos-lote" class="d-none">
-                            <div class="mb-4 text-center">
-                                <span class="badge bg-success fs-6 p-2 w-100" id="txt-estado">Disponible</span>
-                            </div>
                             
                             <table class="table table-sm table-striped border-top">
-                                border-top
                                 <tbody>
                                     <tr>
                                         <th scope="row" class="text-muted w-50">N° de Cuenta:</th>
                                         <td id="lbl-cuenta" class="fw-bold text-primary">-</td>
                                     </tr>
                                     <tr>
-                                        <th scope="row" class="text-muted">Loteo:</th>
-                                        <td>{{loteo.nombre}}</td>
-                                    </tr>
-                                    <tr>
                                         <th scope="row" class="text-muted">Nomenclatura:</th>
-                                        <td id="lbl-nomenclatura" class="text-secondary">Próximamente...</td>
+                                        <td id="lbl-nomenclatura" class="text-secondary">-</td>
                                     </tr>
                                     <tr>
-                                        <th scope="row" class="text-muted">Superficie:</th>
-                                        <td id="lbl-superficie" class="text-secondary">Consultando...</td>
+                                        <th scope="row" class="text-muted">Titular:</th>
+                                        <td id="lbl-titular" class="text-secondary">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="text-muted">Designación:</th>
+                                        <td id="lbl-designacion" class="text-secondary">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="text-muted">Superficies:</th>
+                                        <td class="text-secondary small">
+                                            <strong>Total:</strong> <span id="lbl-superficie">-</span> m²<br>
+                                            <strong>Cubierta:</strong> <span id="lbl-cubierta">-</span> m²
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="text-muted">Obs:</th>
+                                        <td id="lbl-observaciones" class="text-secondary small">-</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -94,140 +101,132 @@
     </div>
 
     <script>
-        // Inicializar mapa
-        var map = L.map('mapa');
+        // 1. Inicializar mapa con coordenadas seguras de inicio
+        var map = L.map('mapa').setView([-33.12, -64.35], 12); 
 
-        // Fondo de calles tradicional
+        // 2. Fondo de calles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap',
             maxZoom: 20
         }).addTo(map);
 
-        // --- DISEÑO DE ESTILOS PARA EL REMARCADO ---
-        // Estilo estándar de los lotes (Rojo fino)
-        var estiloEstandar = {
-            color: "#dc3545",
-            weight: 1.5,
-            fillColor: "#dc3545",
-            fillOpacity: 0.15
-        };
+        // 3. Forzar el recálculo del tamaño (evita el recuadro gris de Bootstrap)
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 300);
 
-        // Estilo de selección (Azul grueso y brillante)
-        var estiloSeleccionado = {
-            color: "#0d6efd",
-            weight: 3.5,
-            fillColor: "#0d6efd",
-            fillOpacity: 0.4
-        };
-
-        // Variable global para recordar qué lote está seleccionado actualmente
+        // 4. VARIABLES DE ESTILO (¡Esto es lo que faltaba y daba el error!)
+        var estiloEstandar = { color: "#dc3545", weight: 1.5, fillColor: "#dc3545", fillOpacity: 0.15 };
+        var estiloSeleccionado = { color: "#0d6efd", weight: 3.5, fillColor: "#0d6efd", fillOpacity: 0.5 };
         var capaSeleccionada = null;
-        var capaLotesGeoJson = null; // Guardará la referencia global de toda la capa
+        var capaLotesGeoJson = null;
 
-        // Cargar el GeoJSON
-        fetch('/mapas/loteo-loma-alta-sur.geojson')
-            .then(response => response.json())
+        // 5. FUNCIONES AUXILIARES
+        function obtenerCuentaPlano(propiedades) {
+            if (!propiedades) return null;
+            return propiedades.cuenta || propiedades.Cuenta || propiedades.CUENTA || propiedades.nro_cuenta || propiedades.numero_cuenta || propiedades.id || null;
+        }
+
+        function inyectarTexto(id, texto) {
+            var elemento = document.getElementById(id);
+            if (elemento) elemento.innerText = texto;
+        }
+
+        function seleccionarLote(layer, propiedades) {
+            try {
+                if (capaSeleccionada !== null) {
+                    capaLotesGeoJson.resetStyle(capaSeleccionada);
+                }
+                layer.setStyle(estiloSeleccionado);
+                if (layer.bringToFront) layer.bringToFront();
+                capaSeleccionada = layer;
+            } catch (err) { console.warn(err); }
+
+            var cuenta = obtenerCuentaPlano(propiedades);
+            if (cuenta) {
+                fetch('/api/lotes/' + encodeURIComponent(cuenta))
+                    .then(response => {
+                        if (!response.ok) throw new Error("Lote no encontrado en BD.");
+                        return response.json();
+                    })
+                    .then(lote => {
+                        var msjAyuda = document.getElementById('mensaje-ayuda');
+                        var datosLote = document.getElementById('datos-lote');
+                        if(msjAyuda) msjAyuda.classList.add('d-none');
+                        if(datosLote) datosLote.classList.remove('d-none');
+
+                        inyectarTexto('lbl-cuenta', lote.numeroCuenta);
+                        inyectarTexto('lbl-nomenclatura', lote.nomenclatura ? lote.nomenclatura : "Sin asignar");
+                        inyectarTexto('lbl-titular', lote.titular ? lote.titular : "Sin asignar");
+                        inyectarTexto('lbl-designacion', lote.designacionOficial ? lote.designacionOficial : "-");
+                        inyectarTexto('lbl-superficie', lote.superficie ? lote.superficie : "0");
+                        inyectarTexto('lbl-cubierta', lote.superficieCubierta ? lote.superficieCubierta : "0");
+                        inyectarTexto('lbl-observaciones', lote.observaciones ? lote.observaciones : "Ninguna");
+                    })
+                    .catch(error => console.warn(error));
+            }
+        }
+
+        // 6. CARGA DEL MAPA Y RENDERIZADO
+        let urlMapa = '';
+        if ({{etapaSeleccionada}} !== false) {
+            urlMapa = '/mapas/etapa-' + {{etapaSeleccionada}} + '.geojson';
+        } else {
+            urlMapa = '/mapas/loteo-{{loteo.idLoteo}}.geojson';
+        }
+            
+        fetch(urlMapa)      
+            .then(response => {
+                if (!response.ok) throw new Error("Error al cargar el archivo GeoJSON.");
+                return response.json();
+            })
             .then(data => {
                 capaLotesGeoJson = L.geoJSON(data, {
                     style: estiloEstandar,
                     onEachFeature: function (feature, layer) {
-                        
-                        // Evento al hacer clic en cada polígono
                         layer.on('click', function(e) {
-                            
-                           // 1. Remarcado visual (Mantiene el color azul en el seleccionado)
-                            if (capaSeleccionada !== null) {
-                                capaLotesGeoJson.resetStyle(capaSeleccionada);
-                            }
-                            layer.setStyle(estiloSeleccionado);
-                            layer.bringToFront();
-                            capaSeleccionada = layer;
-
-                            // 2. Agramos el número de cuenta del polígono
-                            var cuenta = feature.properties.cuenta;
-
-                            if (cuenta) {
-                                // Hacemos la consulta en silencio a la base de datos de Spring Boot
-                                fetch('/api/lotes/' + cuenta)
-                                    .then(response => {
-                                        if (!response.ok) {
-                                            throw new Error("El lote existe en el plano pero no está cargado en la Base de Datos.");
-                                        }
-                                        return response.json();
-                                    })
-                                    .then(lote => {
-                                        // Ocultamos el mensaje de ayuda y mostramos el panel de datos
-                                        document.getElementById('mensaje-ayuda').classList.add('d-none');
-                                        document.getElementById('datos-lote').classList.remove('d-none');
-
-                                        // Inyectamos los datos reales de PostgreSQL en la tabla
-                                        document.getElementById('lbl-cuenta').innerText = lote.numeroCuenta;
-                                        document.getElementById('lbl-nomenclatura').innerText = lote.nomenclatura ? lote.nomenclatura : "Sin asignar";
-                                        document.getElementById('lbl-superficie').innerText = lote.superficie + " m²";
-                                        
-                                        // Modificamos el Badge de estado dinámicamente según la BD (Disponible / Vendido)
-                                        var badgeEstado = document.getElementById('txt-estado');
-                                        badgeEstado.innerText = lote.estado;
-                                        
-                                        if (lote.estado === 'Vendido') {
-                                            badgeEstado.className = "badge bg-danger fs-6 p-2 w-100";
-                                        } else if (lote.estado === 'Reservado') {
-                                            badgeEstado.className = "badge bg-warning text-dark fs-6 p-2 w-100";
-                                        } else {
-                                            badgeEstado.className = "badge bg-success fs-6 p-2 w-100";
-                                        }
-                                    })
-                                    .catch(error => {
-                                        alert(error.message);
-                                    });
-                            } else {
-                                alert("Este polígono no tiene configurado el atributo 'cuenta' en el GeoJSON.");
-                            }
+                            seleccionarLote(layer, feature.properties);
                         });
-
                     }
                 }).addTo(map);
 
-                // --- LÓGICA DE BÚSQUEDA DESDE LA LISTA ---
-                
-                // 1. Leemos si vino algún número de cuenta en la URL de la página
+                // --- BÚSQUEDA AUTOMÁTICA O ENFOQUE GLOBAL ---
                 var parametrosUrl = new URLSearchParams(window.location.search);
                 var cuentaBuscada = parametrosUrl.get('cuenta');
                 var loteEncontrado = false;
 
                 if (cuentaBuscada) {
-                    console.log("Buscando la cuenta que vino de la lista:", cuentaBuscada); // Mensaje espía
-                    
+                    // Si se hizo clic en "Mostrar en Mapa" desde un lote
                     capaLotesGeoJson.eachLayer(function(layer) {
-                        // Agarramos el dato del plano. Si es nulo o no existe, lo ignoramos.
-                        var cuentaPlano = layer.feature.properties.cuenta;
-                        
-                        if (cuentaPlano) {
-                            // Convertimos los dos obligatoriamente a texto (String) para que coincidan perfecto
-                            if (String(cuentaPlano) === String(cuentaBuscada)) {
-                                
-                                // ¡Encontrado! Hacemos el vuelo de cámara
-                                map.fitBounds(layer.getBounds(), { maxZoom: 19 });
-                                
-                                // Simulamos el clic
-                                layer.fire('click');
-                                
-                                loteEncontrado = true;
-                            }
+                        if (loteEncontrado) return; 
+
+                        var cuentaPlano = obtenerCuentaPlano(layer.feature.properties);
+                        if (cuentaPlano && String(cuentaPlano).trim().toLowerCase() === String(cuentaBuscada).trim().toLowerCase()) {
+                            
+                            loteEncontrado = true;
+                            
+                            // 1. Zoom al lote
+                            map.fitBounds(layer.getBounds(), { maxZoom: 19 });
+                            
+                            // 2. Pintar de azul con micro-delay
+                            setTimeout(() => {
+                                seleccionarLote(layer, layer.feature.properties);
+                            }, 250);
                         }
                     });
-                }
 
-                // Si no se buscó nada (entró desde el botón normal) o si la cuenta de la BD no está dibujada en QGIS:
-                if (!loteEncontrado) {
-                    // Si no encontró nada, centra todo el loteo
-                    map.fitBounds(capaLotesGeoJson.getBounds());
-                    if (cuentaBuscada) {
-                        alert("Atención: La cuenta '" + cuentaBuscada + "' está en la base de datos, pero no se encontró en el dibujo del mapa.");
+                    if (!loteEncontrado) {
+                        map.fitBounds(capaLotesGeoJson.getBounds());
+                        alert("⚠️ ATENCIÓN: La cuenta '" + cuentaBuscada + "' no se encontró dibujada en el archivo QGIS de esta etapa.");
+                    }
+                } else {
+                    // Si entró desde "Ver Plano", encuadrar todo el barrio automáticamente
+                    if (capaLotesGeoJson.getBounds().isValid()) {
+                        map.fitBounds(capaLotesGeoJson.getBounds());
                     }
                 }
             })
-            .catch(error => console.error("Error crítico al renderizar el mapa:", error));
+            .catch(error => console.error("Error al renderizar el mapa:", error));
     </script>
 </body>
 </html>

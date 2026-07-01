@@ -1,8 +1,13 @@
 com/example/app/repositories/LoteoRepository.class
 com/example/app/controllers/AuthController.class
+com/example/app/repositories/EtapaRepository.class
+com/example/app/models/Etapa.class
+com/example/app/services/UserDetailsServiceImpl.class
+com/example/app/App.class
+com/example/app/models/Usuario.class
 com/example/app/models/Loteo.class
 com/example/app/config/SecurityConfig.class
 com/example/app/controllers/LoteoController.class
 com/example/app/models/Lote.class
+com/example/app/repositories/UsuarioRepository.class
 com/example/app/repositories/LoteRepository.class
-com/example/app/App.class

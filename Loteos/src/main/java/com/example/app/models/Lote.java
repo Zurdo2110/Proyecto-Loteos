@@ -46,6 +46,13 @@ public class Lote {
     @JoinColumn(name = "id_loteo", nullable = false)
     private Loteo loteo;
 
+    // NUEVA RELACIÓN OPCIONAL (nullable = true)
+    // Si el loteo es simple, esto queda en null. Si tiene etapas, se vincula acá.
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_etapa", nullable = true) 
+    private Etapa etapa;
+
     public Lote() {}
 
     // --- Getters y Setters ---
@@ -70,12 +77,12 @@ public class Lote {
     public Double getSuperficieCubierta() { return superficieCubierta != null ? superficieCubierta : 0.0; }
     public void setSuperficieCubierta(Double superficieCubierta) { this.superficieCubierta = superficieCubierta; }
 
-    public String getEstado() { return estado != null ? estado : "Sin estado asignado"; }
-    public void setEstado(String estado) { this.estado = estado; }
-
     public String getObservaciones() { return observaciones != null ? observaciones : "-"; }
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
     public Loteo getLoteo() { return loteo; }
     public void setLoteo(Loteo loteo) { this.loteo = loteo; }
+
+    public Etapa getEtapa() { return etapa; }
+    public void setEtapa(Etapa etapa) { this.etapa = etapa; }
 }

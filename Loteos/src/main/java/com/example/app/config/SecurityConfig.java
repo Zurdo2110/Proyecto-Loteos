@@ -4,10 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -17,36 +13,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        // Por ahora, exigimos que cualquiera que entre tenga el rol ADMIN (El estudio)
-                        .requestMatchers("/loteos/**", "/lotes/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/loteos", true)
-                        .permitAll())
-                .logout(logout -> logout.permitAll());
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/mapas/**").permitAll()
+                .requestMatchers("/error").permitAll()
+
+                .requestMatchers("/").hasAnyRole("ADMIN", "CLIENTE") 
+                .requestMatchers("/cliente/**").hasRole("CLIENTE")
+                .requestMatchers("/loteos/lotes/**").hasAnyRole("ADMIN", "CLIENTE")
+                .requestMatchers("/lotes/**").hasAnyRole("ADMIN", "CLIENTE")
+                .requestMatchers("/api/lotes/**").hasAnyRole("ADMIN", "CLIENTE")
+                .requestMatchers("/mapas/**").hasAnyRole("ADMIN", "CLIENTE")
+                .anyRequest().hasRole("ADMIN")
+
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/", true) // Si entra bien, lo mandamos a un "Enrutador"
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+            );
 
         return http.build();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        // Usuario 1: El administrador del estudio
-        UserDetails admin = User.withDefaultPasswordEncoder()
-                .username("zurdo")
-                .password("admin123")
-                .roles("ADMIN")
-                .build();
-
-        // Usuario 2: El cliente de prueba (Aún no le dimos acceso a ninguna ruta)
-        UserDetails cliente = User.withDefaultPasswordEncoder()
-                .username("cliente")
-                .password("olmos123")
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(admin, cliente);
     }
 }

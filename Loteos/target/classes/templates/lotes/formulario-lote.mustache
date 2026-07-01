@@ -59,21 +59,25 @@
                             </div>
 
                             <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <label for="estado" class="form-label fw-bold">Estado</label>
-                                    <select class="form-select" id="estado" name="estado">
-                                        <option value=\"Sin iniciar\">Sin iniciar</option>
-                                        <option value=\"En proceso\">En proceso</option>
-                                        <option value=\"Aprobado\">Aprobado</option>
-                                        <option value=\"Observado\">Observado</option>
-                                    </select>
-                                </div>
                                 <div class="col-md-8">
                                     <label for="observaciones" class="form-label fw-bold">Observaciones</label>
                                     <textarea class="form-control" id="observaciones" name="observaciones" rows="1"></textarea>
                                 </div>
                             </div>
 
+                            {{#tieneEtapas}}
+                                <div class="col-md-6 mb-3">
+                                    <label for="idEtapa" class="form-label fw-bold">Asignar a Etapa</label>
+                                    <select class="form-select" id="idEtapa" name="idEtapa">
+                                        <option value="">-- Sin etapa (Loteo general / completo) --</option>
+                                        {{#etapas}}
+                                            <option value="{{idEtapa}}">📁 {{nombre}}</option>
+                                        {{/etapas}}
+                                    </select>
+                                    <div class="form-text">Dejalo en blanco si la parcela no pertenece a una fase específica.</div>
+                                </div>
+                            {{/tieneEtapas}}
+                            
                             <div class="d-flex justify-content-between">
                                 <a href="/loteos/{{loteo.idLoteo}}/lotes" class="btn btn-outline-secondary">Cancelar</a>
                                 <button type="submit" class="btn btn-success fw-bold">Guardar Parcela</button>
