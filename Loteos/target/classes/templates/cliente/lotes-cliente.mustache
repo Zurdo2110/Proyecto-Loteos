@@ -119,10 +119,7 @@
                 
                 <div class="card-footer text-end bg-white d-flex justify-content-end gap-2 p-3">
                     <a href="/cliente/loteos/{{loteo.idLoteo}}/visor?cuenta={{numeroCuenta}}{{#etapaSeleccionada}}&idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}" class="btn btn-info text-white fw-bold">🗺️ Mostrar en Mapa</a>
-                    <a href="/lotes/{{idLote}}/editar" class="btn btn-warning fw-bold">Modificar Datos</a>
-                    <form action="/lotes/{{idLote}}/eliminar" method="post" class="m-0" onsubmit="return confirm('¿Estás seguro de que querés borrar esta parcela definitivamente?');">
-                        <button type="submit" class="btn btn-danger fw-bold">Eliminar Parcela</button>
-                    </form>
+                    <a href="/cliente/lotes/{{idLote}}/editar" class="btn btn-warning fw-bold">Modificar Datos</a>
                 </div>
             </div>
         </div>

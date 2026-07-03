@@ -131,8 +131,9 @@ public class LoteoController {
 
     // Mostrar el visor web del mapa interactivo
     @GetMapping("/loteos/{id}/visor")
-    public String verMapa(@PathVariable("id") Integer id, @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
-     Model model) {
+    public String verMapa(@PathVariable("id") Integer id,
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
+            Model model) {
         Loteo loteo = loteoRepository.findById(id).orElse(null);
         model.addAttribute("loteo", loteo);
 
@@ -399,5 +400,49 @@ public class LoteoController {
     @ResponseBody
     public List<Lote> obtenerDatosMapaCliente(@PathVariable("id") Integer id) {
         return loteRepository.findByLoteoIdLoteo(id);
+    }
+
+    // --- MODIFICAR (Mostrar Formulario) ---
+    @GetMapping("/cliente/lotes/{idLote}/editar")
+    public String mostrarFormularioEditarCliente(@PathVariable("idLote") Integer idLote, Model model) {
+        Lote lote = loteRepository.findById(idLote).orElse(null);
+        model.addAttribute("lote", lote);
+
+        if (lote != null) {
+            model.addAttribute("loteo", lote.getLoteo());
+        }
+
+        return "cliente/formulario-cliente-editar-lote";
+    }
+
+    // --- MODIFICAR (Guardar Cambios) ---
+    @PostMapping("/cliente/lotes/{idLote}/editar")
+    public String guardarEdicionCliente(
+            @PathVariable("idLote") Integer idLote, 
+            @RequestParam(value = "titular", required = false) String titular,
+            @RequestParam(value =  "designacionOficial", required = false) String designacionOficial,
+            @RequestParam(value = "observaciones", required = false) String observaciones,
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa) {
+
+        Lote lote = loteRepository.findById(idLote).orElse(null);
+
+        if (lote == null) {
+            // el lote no existe, no hay nada que guardar
+            return "redirect:/cliente/loteos/lotes";
+        }
+
+        lote.setTitular(titular);
+        lote.setDesignacionOficial(designacionOficial);
+        lote.setObservaciones(observaciones);
+
+        loteRepository.save(lote);
+
+        Integer idLoteo = lote.getLoteo().getIdLoteo();
+
+        if (idEtapa != null) {
+            return "redirect:/cliente/loteos/" + idLoteo + "/lotes?idEtapa=" + idEtapa;
+        } else {
+            return "redirect:/cliente/loteos/" + idLoteo + "/lotes";
+        }
     }
 }
