@@ -432,3 +432,4 @@ target/
 *.clas
 *.class
 *.jar
+*.properties
