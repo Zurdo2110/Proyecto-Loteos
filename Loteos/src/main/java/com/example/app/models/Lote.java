@@ -33,6 +33,12 @@ public class Lote {
     @Column(name = "superficie_cubierta")
     private Double superficieCubierta;
 
+    @Column(name = "cuentaEmos", length = 7)
+    private String cuentaEmos;
+
+    @Column(name = "cuentaMuni", length = 9)
+    private String cuentaMuni;
+
     // --- ATRIBUTOS VIEJOS (Los mantenemos por ahora para no romper el Controlador) ---
     @Column(length = 50)
     private String estado;
@@ -85,4 +91,11 @@ public class Lote {
 
     public Etapa getEtapa() { return etapa; }
     public void setEtapa(Etapa etapa) { this.etapa = etapa; }
+
+    public String getCuentaEmos() { return cuentaEmos; }
+    public void setCuentaEmos(String cuentaEmos) { this.cuentaEmos = cuentaEmos; }
+
+    public String getCuentaMuni() { return cuentaMuni; }
+    public void setCuentaMuni(String cuentaMuni) { this.cuentaMuni = cuentaMuni; }     
+
 }

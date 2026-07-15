@@ -18,11 +18,18 @@ public interface LoteRepository extends JpaRepository<Lote, Integer> {
     List<Lote> findByLoteoIdLoteo(Integer idLoteo);
     List<Lote> findByEtapaIdEtapa(Integer idEtapa);
 
-    @Query("SELECT l FROM Lote l WHERE l.loteo.idLoteo = :loteoId AND (LOWER(l.numeroCuenta) LIKE LOWER(CONCAT('%', :termino, '%')) OR LOWER(l.titular) LIKE LOWER(CONCAT('%', :termino, '%')))")
-    List<Lote> buscarPorCuentaOTitular(@Param("loteoId") Integer loteoId, @Param("termino") String termino);
+    @Query("SELECT l FROM Lote l WHERE l.loteo.idLoteo = :idLoteo AND (" +
+           "LOWER(l.numeroCuenta) LIKE LOWER(:term) OR " +
+           "LOWER(coalesce(l.titular, '')) LIKE LOWER(:term) OR " +
+           "LOWER(coalesce(l.designacionOficial, '')) LIKE LOWER(:term))")
+    List<Lote> buscarPorCuentaOTitular(@Param("idLoteo") Integer idLoteo, @Param("term") String term);
 
-    @Query("SELECT l FROM Lote l WHERE l.etapa.idEtapa = :idEtapa AND (LOWER(l.numeroCuenta) LIKE LOWER(CONCAT('%', :buscar, '%')) OR LOWER(l.titular) LIKE LOWER(CONCAT('%', :buscar, '%')))")
-    List<Lote> buscarPorEtapaYTermino(@Param("idEtapa") Integer idEtapa, @Param("buscar") String buscar);
+    // Búsqueda para loteos CON etapas (filtrando por etapa activa)
+    @Query("SELECT l FROM Lote l WHERE l.etapa.idEtapa = :idEtapa AND (" +
+           "LOWER(l.numeroCuenta) LIKE LOWER(:term) OR " +
+           "LOWER(coalesce(l.titular, '')) LIKE LOWER(:term) OR " +
+           "LOWER(coalesce(l.designacionOficial, '')) LIKE LOWER(:term))")
+    List<Lote> buscarPorEtapaYTermino(@Param("idEtapa") Integer idEtapa, @Param("term") String term);
 
     Optional<Lote> findByNumeroCuenta(String numeroCuenta);
 }

@@ -55,7 +55,7 @@
                     <input type="text" name="buscar" class="form-control" placeholder="Buscar cuenta o titular..." value="{{#buscar}}{{buscar}}{{/buscar}}">
                     <button class="btn btn-primary" type="submit">🔍</button>
                     {{#buscar}}
-                        <a href="/cliente/loteos/{{loteo.idLoteo}}/lotes" class="btn btn-outline-secondary">X</a>
+                        <a href="/cliente/loteos/{{loteo.idLoteo}}/lotes{{#etapaSeleccionada}}?idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}" class="btn btn-outline-secondary">X</a>
                     {{/buscar}}
                 </div>
             </form>
@@ -109,6 +109,14 @@
                             <strong>Total:</strong> {{#superficie}}{{superficie}}{{/superficie}}{{^superficie}}0{{/superficie}} <br>
                             <strong>Cubierta:</strong> {{#superficieCubierta}}{{superficieCubierta}}{{/superficieCubierta}}{{^superficieCubierta}}0{{/superficieCubierta}}
                         </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted fw-bold">Cuenta EMOS:</div>
+                        <div class="col-sm-8">{{#cuentaEmos}}{{cuentaEmos}}{{/cuentaEmos}}{{^cuentaEmos}}<span class="text-muted fst-italic">0</span>{{/cuentaEmos}}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted fw-bold">Cuenta Municipal:</div>    
+                        <div class="col-sm-8">{{#cuentaMuni}}{{cuentaMuni}}{{/cuentaMuni}}{{^cuentaMuni}}<span class="text-muted fst-italic">0</span>{{/cuentaMuni}}</div>
                     </div>
                     <hr class="my-2">
                     <div class="row mb-2">

@@ -99,7 +99,8 @@ public class LoteoController {
             // ESTAMOS ADENTRO DE UNA ETAPA
             if (buscar != null && !buscar.isBlank()) {
                 // Si escribió algo en el buscador, filtramos solo en esta etapa
-                lotes = loteRepository.buscarPorEtapaYTermino(idEtapa, buscar);
+                String buscarSql = "%" + buscar.trim().replaceAll("\\s+", "%") + "%";
+                lotes = loteRepository.buscarPorEtapaYTermino(idEtapa, buscarSql);
             } else {
                 // Si no buscó nada, mostramos todos los de la etapa
                 lotes = loteRepository.findByEtapaIdEtapa(idEtapa);
@@ -110,8 +111,8 @@ public class LoteoController {
         } else {
             // COMPORTAMIENTO NORMAL: Loteos sin etapas
             if (buscar != null && !buscar.isBlank()) {
-                // (Acá va el método de búsqueda viejo que ya tenías para loteos enteros)
-                lotes = loteRepository.buscarPorCuentaOTitular(id, buscar);
+                String buscarSql = "%" + buscar.trim().replaceAll("\\s+", "%") + "%";
+                lotes = loteRepository.buscarPorCuentaOTitular(id, buscarSql);
             } else {
                 lotes = loteRepository.findByLoteoIdLoteo(id);
             }
@@ -242,6 +243,9 @@ public class LoteoController {
             loteExistente.setDesignacionOficial(loteActualizado.getDesignacionOficial());
             loteExistente.setSuperficieCubierta(loteActualizado.getSuperficieCubierta());
             loteExistente.setObservaciones(loteActualizado.getObservaciones());
+            loteExistente.setTitular(loteActualizado.getTitular());
+            loteExistente.setCuentaEmos(loteActualizado.getCuentaEmos());
+            loteExistente.setCuentaMuni(loteActualizado.getCuentaMuni());
 
             // Guardamos (Como ya tiene un ID, Spring Boot sabe que es un UPDATE y no un
             // INSERT)
@@ -345,22 +349,29 @@ public class LoteoController {
         boolean tieneEtapas = !etapas.isEmpty();
         model.addAttribute("tieneEtapas", tieneEtapas);
         model.addAttribute("etapas", etapas);
+        model.addAttribute("etapaSeleccionada", idEtapa);
 
         // Traemos los lotes con la misma lógica inteligente pero para la vista del
         // cliente
         List<Lote> lotes;
         if (tieneEtapas && idEtapa != null) {
+            // ESTAMOS ADENTRO DE UNA ETAPA
             if (buscar != null && !buscar.isBlank()) {
-                lotes = loteRepository.buscarPorEtapaYTermino(idEtapa, buscar);
+                // Si escribió algo en el buscador, filtramos solo en esta etapa
+                String buscarSql = "%" + buscar.trim().replaceAll("\\s+", "%") + "%";
+                lotes = loteRepository.buscarPorEtapaYTermino(idEtapa, buscarSql);
             } else {
+                // Si no buscó nada, mostramos todos los de la etapa
                 lotes = loteRepository.findByEtapaIdEtapa(idEtapa);
             }
-            model.addAttribute("etapaSeleccionada", idEtapa);
         } else if (tieneEtapas && idEtapa == null) {
+            // Tiene etapas pero no seleccionó ninguna pestaña, dejamos la lista vacía
             lotes = List.of();
         } else {
+            // COMPORTAMIENTO NORMAL: Loteos sin etapas
             if (buscar != null && !buscar.isBlank()) {
-                lotes = loteRepository.buscarPorCuentaOTitular(id, buscar);
+                String buscarSql = "%" + buscar.trim().replaceAll("\\s+", "%") + "%";
+                lotes = loteRepository.buscarPorCuentaOTitular(id, buscarSql);
             } else {
                 lotes = loteRepository.findByLoteoIdLoteo(id);
             }
@@ -375,7 +386,6 @@ public class LoteoController {
             model.addAttribute("loteSeleccionado", loteSeleccionado);
         }
         // -------------------------------------------------------
-
         return "cliente/lotes-cliente";
     }
 
@@ -386,13 +396,20 @@ public class LoteoController {
             Model model) {
 
         Loteo loteo = loteoRepository.findById(id).orElse(null);
+        
+        // --- CONTROL DE SEGURIDAD ---
+        if (loteo == null) {
+            // Si el loteo no existe, lo mandamos de vuelta al inicio del portal de clientes
+            return "redirect:/cliente/loteos"; 
+        }
         model.addAttribute("loteo", loteo);
 
         List<Etapa> etapas = etapaRepository.findByLoteoIdLoteo(id);
         model.addAttribute("tieneEtapas", !etapas.isEmpty());
 
-        model.addAttribute("idEtapa", idEtapa != null ? idEtapa : false);
+        // Mantenemos tu excelente lógica para el JavaScript de Leaflet
         model.addAttribute("etapaSeleccionada", idEtapa != null ? idEtapa : false);
+        
         return "cliente/visor-cliente";
     }
 
@@ -422,7 +439,9 @@ public class LoteoController {
             @RequestParam(value = "titular", required = false) String titular,
             @RequestParam(value =  "designacionOficial", required = false) String designacionOficial,
             @RequestParam(value = "observaciones", required = false) String observaciones,
-            @RequestParam(value = "idEtapa", required = false) Integer idEtapa) {
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
+            @RequestParam(value = "cuentaEmos", required = false) String cuentaEmos,
+            @RequestParam(value = "cuentaMuni", required = false) String cuentaMuni) {
 
         Lote lote = loteRepository.findById(idLote).orElse(null);
 
@@ -434,6 +453,9 @@ public class LoteoController {
         lote.setTitular(titular);
         lote.setDesignacionOficial(designacionOficial);
         lote.setObservaciones(observaciones);
+        lote.setCuentaEmos(cuentaEmos != null ? cuentaEmos : "-");
+        lote.setCuentaMuni(cuentaMuni != null ? cuentaMuni : "-");
+
 
         loteRepository.save(lote);
 

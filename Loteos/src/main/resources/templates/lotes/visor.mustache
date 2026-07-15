@@ -82,6 +82,14 @@
                                         </td>
                                     </tr>
                                     <tr>
+                                        <th scope="row" class="text-muted">Cuenta EMOS:</th>
+                                        <td id="lbl-cuenta-emos" class="text-secondary">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" class="text-muted">Cuenta Municipal:</th>
+                                        <td id="lbl-cuenta-municipal" class="text-secondary">-</td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row" class="text-muted">Obs:</th>
                                         <td id="lbl-observaciones" class="text-secondary small">-</td>
                                     </tr>
@@ -162,6 +170,8 @@
                         inyectarTexto('lbl-superficie', lote.superficie ? lote.superficie : "0");
                         inyectarTexto('lbl-cubierta', lote.superficieCubierta ? lote.superficieCubierta : "0");
                         inyectarTexto('lbl-observaciones', lote.observaciones ? lote.observaciones : "Ninguna");
+                        inyectarTexto('lbl-cuenta-emos', lote.cuentaEmos ? lote.cuentaEmos : "-");
+                        inyectarTexto('lbl-cuenta-municipal', lote.cuentaMuni ? lote.cuentaMuni : "-");
                     })
                     .catch(error => console.warn(error));
             }
