@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Ingreso - Portal de Agrimensura</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body class="bg-light d-flex align-items-center" style="height: 100vh;">
 
@@ -13,9 +14,11 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
-                        <img src="/images/logoEstudio.jpeg" alt="Buffarini & Asociados - Estudio de Agrimensura" style="width: 100%; max-width: 260px; height: auto;" class="mb-3">
-                        <h3 class="text-primary fw-bold"> Portal de Clientes</h3>
-                        <p class="text-muted">Ingrese sus credenciales</p>
+                        <div class="text-center mb-4">
+                            <img src="/images/logoEstudio.jpeg" alt="Buffarini & Asociados - Estudio de Agrimensura" style="width: 100%; max-width: 260px; height: auto;" class="mb-3">
+                            <h3 class="text-primary fw-bold"> Portal de Clientes</h3>
+                            <p class="text-muted">Ingrese sus credenciales</p>
+                        </div>
                     </div>
 
                     {{#error}}
@@ -32,7 +35,12 @@
                         </div>
                         <div class="mb-4">
                             <label class="form-label fw-bold">Contraseña</label>
-                            <input type="password" name="password" class="form-control" required>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control" required>
+                                <button type="button" class="btn btn-outline-secondary" id="toggle-password" tabindex="-1">
+                                    <i class="bi bi-eye" id="icono-ojo"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="d-grid">
@@ -46,5 +54,21 @@
     </div>
 </div>
 
+<script>
+    document.getElementById('toggle-password').addEventListener('click', function() {
+        var input = document.getElementById('password');
+        var icono = document.getElementById('icono-ojo');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icono.classList.remove('bi-eye');
+            icono.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icono.classList.remove('bi-eye-slash');
+            icono.classList.add('bi-eye');
+        }
+    });
+</script>
 </body>
 </html>

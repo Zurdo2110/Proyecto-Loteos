@@ -55,9 +55,6 @@
                         </div>
 
                         <div id="datos-lote" class="d-none">
-                            <div class="mb-4 text-center">
-                                <span class="badge bg-success fs-6 p-2 w-100" id="txt-estado">Disponible</span>
-                            </div>
                             
                         <table class="table table-sm table-striped border-top">
                                 <tbody>
@@ -135,7 +132,7 @@
         // 5. FUNCIONES AUXILIARES
         function obtenerCuentaPlano(propiedades) {
             if (!propiedades) return null;
-            return propiedades.cuenta || propiedades.Cuenta || propiedades.CUENTA || propiedades.nro_cuenta || propiedades.numero_cuenta || propiedades.id || null;
+            return propiedades.cuenta || propiedades.Cuenta || propiedades.CUENTA || propiedades.nro_cuenta || propiedades.numero_cuenta || propiedades.id || propiedades.Nro_Cuenta || null;
         }
 
         function inyectarTexto(id, texto) {
