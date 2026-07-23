@@ -32,4 +32,6 @@ public interface LoteRepository extends JpaRepository<Lote, Integer> {
     List<Lote> buscarPorEtapaYTermino(@Param("idEtapa") Integer idEtapa, @Param("term") String term);
 
     Optional<Lote> findByNumeroCuenta(String numeroCuenta);
+
+    boolean existsByEtapaIdEtapa(Integer idEtapa);
 }

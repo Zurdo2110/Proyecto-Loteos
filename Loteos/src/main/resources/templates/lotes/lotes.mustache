@@ -9,8 +9,10 @@
 
     <nav class="navbar navbar-dark bg-dark mb-4">
         <div class="container-fluid px-4 d-flex justify-content-between">
-            <span class="navbar-brand mb-0 h1">Sistema de Gestión Parcelaria</span>
-            
+            <span class="navbar-brand mb-0 h1 d-flex align-items-center gap-3">
+                <img src="/images/logo_badge.png" alt="Logo" height="40">
+                Sistema de Gestión Parcelaria
+            </span>                
             <div class="d-flex gap-2">
                 <a href="/loteos" class="btn btn-outline-light btn-sm">Volver a Loteos</a>
                 
@@ -53,10 +55,9 @@
             </div>
         </div>
 
-        <div class="row">
             <div class="row justify-content-center">
             
-            <div class="{{#loteSeleccionado}}col-md-4{{/loteSeleccionado}}{{^loteSeleccionado}}col-md-8{{/loteSeleccionado}} transition-all">
+                <div class="{{#loteSeleccionado}}col-md-4{{/loteSeleccionado}}{{^loteSeleccionado}}col-md-8{{/loteSeleccionado}} transition-all">
                 
                 {{#tieneEtapas}}
                     <ul class="nav nav-tabs mb-3">
@@ -68,6 +69,7 @@
                     </ul>
                 {{/tieneEtapas}}
 
+                {{#mostrarContenido}}
                 <form action="/loteos/{{loteo.idLoteo}}/lotes" method="get" class="mb-3">
                     <div class="input-group shadow-sm">
                         {{#etapaSeleccionada}}
@@ -83,21 +85,28 @@
 
                 <div class="list-group shadow-sm" style="max-height: 65vh; overflow-y: auto;">
                     {{#lotes}}
-                    <a href="/loteos/{{loteo.idLoteo}}/lotes?idLoteSeleccionado={{idLote}}{{#etapaSeleccionada}}&idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}{{#buscar}}&buscar={{buscar}}{{/buscar}}" 
+                        <a href="/loteos/{{loteo.idLoteo}}/lotes?idLoteSeleccionado={{idLote}}{{#etapaSeleccionada}}&idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}{{#buscar}}&buscar={{buscar}}{{/buscar}}" 
                         class="list-group-item list-group-item-action py-2">
                         <div class="d-flex justify-content-between align-items-center">
                             <strong class="text-dark">Nro Cuenta: {{numeroCuenta}}</strong>
                         </div>
                         <small class="text-muted d-block text-truncate">Titular: {{#titular}}{{titular}}{{/titular}}{{^titular}}Sin asignar{{/titular}}</small>
-                    </a>
+                        </a>
                     {{/lotes}}
-                    
+    
                     {{^lotes}}
-                    <div class="alert alert-warning p-2 text-center text-muted small m-0">
-                        No se encontraron parcelas.
-                    </div>
+                        <div class="alert alert-warning p-2 text-center text-muted small m-0">
+                            No se encontraron parcelas.
+                        </div>
                     {{/lotes}}
                 </div>
+                {{/mostrarContenido}}
+
+                {{^mostrarContenido}}
+                    <div class="text-center text-muted py-4">
+                        <p> Seleccioná una etapa para ver los lotes</p>
+                    </div>
+                {{/mostrarContenido}}
             </div>
 
             {{#loteSeleccionado}}
@@ -153,18 +162,6 @@
                         <form action="/lotes/{{idLote}}/eliminar" method="post" class="m-0" onsubmit="return confirm('¿Estás seguro de que querés borrar esta parcela definitivamente?');">
                             <button type="submit" class="btn btn-danger fw-bold">Eliminar Parcela</button>
                         </form>
-                    </div>
-                </div>
-            </div>
-            {{/loteSeleccionado}}
-
-            {{^loteSeleccionado}}
-            <div class="col-md-8">
-                <div class="card border-1 border-dashed shadow-none h-100 d-flex align-items-center justify-content-center bg-transparent" style="min-height: 400px;">
-                    <div class="text-center text-muted">
-                        <h1 class="display-3 opacity-25">📋</h1>
-                        <h5>Seleccioná una cuenta de la lista</h5>
-                        <p>Los detalles de la parcela aparecerán acá.</p>
                     </div>
                 </div>
             </div>

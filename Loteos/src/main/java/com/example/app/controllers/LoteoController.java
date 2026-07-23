@@ -84,14 +84,17 @@ public class LoteoController {
         Loteo loteo = loteoRepository.findById(id).orElse(null);
         model.addAttribute("loteo", loteo);
 
-        List<Etapa> etapas = etapaRepository.findByLoteoIdLoteo(id);
-        boolean tieneEtapas = !etapas.isEmpty();
-        model.addAttribute("etapas", etapas);
-        model.addAttribute("tieneEtapas", tieneEtapas);
+        List <Etapa> todasLasEtapas = etapaRepository.findByLoteoIdLoteo(id);
+        
+        List<Etapa> etapasActivas = todasLasEtapas.stream()
+                .filter(etapa -> loteRepository.existsByEtapaIdEtapa(etapa.getIdEtapa()))
+                .toList();
 
+        boolean tieneEtapas = !etapasActivas.isEmpty();
+        model.addAttribute("etapas", etapasActivas);
         model.addAttribute("tieneEtapas", tieneEtapas);
-        model.addAttribute("etapas", etapas);
         model.addAttribute("etapaSeleccionada", idEtapa);
+        model.addAttribute("mostrarContenido", !tieneEtapas || idEtapa != null); // Si tiene etapas y no seleccionó ninguna, no mostramos contenido
 
         // 2. Traemos la lista de lotes (filtrada por el buscador o completa)
         List<Lote> lotes;
@@ -345,14 +348,21 @@ public class LoteoController {
         model.addAttribute("loteo", loteo);
 
         // Verificamos si este loteo tiene etapas
-        List<Etapa> etapas = etapaRepository.findByLoteoIdLoteo(id);
-        boolean tieneEtapas = !etapas.isEmpty();
+        List<Etapa> todasLasEtapas = etapaRepository.findByLoteoIdLoteo(id);
+        
+        List<Etapa> etapasActivas = todasLasEtapas.stream()
+                .filter(etapa -> loteRepository.existsByEtapaIdEtapa(etapa.getIdEtapa()))
+                .toList();
+        
+        
+        boolean tieneEtapas = !etapasActivas.isEmpty();
         model.addAttribute("tieneEtapas", tieneEtapas);
-        model.addAttribute("etapas", etapas);
+        model.addAttribute("etapas", etapasActivas);
         model.addAttribute("etapaSeleccionada", idEtapa);
+        model.addAttribute("mostrarContenido", !tieneEtapas || idEtapa != null); // Si tiene etapas y no seleccionó ninguna, no mostramos contenido
 
         // Traemos los lotes con la misma lógica inteligente pero para la vista del
-        // cliente
+        // cliente      
         List<Lote> lotes;
         if (tieneEtapas && idEtapa != null) {
             // ESTAMOS ADENTRO DE UNA ETAPA
