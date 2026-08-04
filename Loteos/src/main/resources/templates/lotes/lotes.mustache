@@ -28,7 +28,9 @@
             <div>
                 <div class="d-flex align-items-center gap-3 mb-1">
                     <h2 class="text-primary m-0">{{loteo.nombre}}</h2>
-                    <a href="/loteos/{{loteo.idLoteo}}/editar" class="btn btn-outline-warning btn-sm">✏️ Editar Nombre</a>
+                    <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarLoteo">
+                        ✏️ Editar Nombre
+                    </button>
                     <form action="/loteos/{{loteo.idLoteo}}/eliminar" method="post" class="m-0" onsubmit="return confirm('ATENCIÓN: Borrar este proyecto eliminará TODAS las parcelas. ¿Estás seguro?');">
                         <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Eliminar Loteo</button>
                     </form>
@@ -131,6 +133,15 @@
                         <div class="row mb-2">
                             <div class="col-sm-4 text-muted fw-bold">Designación Oficial:</div>
                             <div class="col-sm-8">{{#designacionOficial}}{{designacionOficial}}{{/designacionOficial}}{{^designacionOficial}}<span class="text-muted fst-italic">-</span>{{/designacionOficial}}</div>
+                        </div>
+                        <hr class="my-2">
+                            <div class="row mb-2">
+                            <div class="col-sm-4 text-muted fw-bold">Manzana:</div>
+                            <div class="col-sm-8 d-flex align-items-center">
+                                <span>{{#manzana}}{{manzana}}{{/manzana}}{{^manzana}}<span class="text-muted fst-italic">-</span>{{/manzana}}</span>
+                                <span class="text-muted fw-bold ms-4 me-2">Lote:</span>
+                                <span>{{#numeroLote}}{{numeroLote}}{{/numeroLote}}{{^numeroLote}}<span class="text-muted fst-italic">-</span>{{/numeroLote}}</span>
+                            </div>
                         </div>
                         <hr class="my-2">
                         <div class="row mb-2">

@@ -249,6 +249,9 @@ public class LoteoController {
             loteExistente.setTitular(loteActualizado.getTitular());
             loteExistente.setCuentaEmos(loteActualizado.getCuentaEmos());
             loteExistente.setCuentaMuni(loteActualizado.getCuentaMuni());
+            loteExistente.setDomicilio(loteActualizado.getDomicilio());
+            loteExistente.setManzana(loteActualizado.getManzana());
+            loteExistente.setNumeroLote(loteActualizado.getNumeroLote());
 
             // Guardamos (Como ya tiene un ID, Spring Boot sabe que es un UPDATE y no un
             // INSERT)
@@ -451,7 +454,8 @@ public class LoteoController {
             @RequestParam(value = "observaciones", required = false) String observaciones,
             @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
             @RequestParam(value = "cuentaEmos", required = false) String cuentaEmos,
-            @RequestParam(value = "cuentaMuni", required = false) String cuentaMuni) {
+            @RequestParam(value = "cuentaMuni", required = false) String cuentaMuni,
+            @RequestParam(value = "domicilio", required = false) String domicilio) {
 
         Lote lote = loteRepository.findById(idLote).orElse(null);
 
@@ -465,8 +469,10 @@ public class LoteoController {
         lote.setObservaciones(observaciones);
         lote.setCuentaEmos(cuentaEmos != null ? cuentaEmos : "-");
         lote.setCuentaMuni(cuentaMuni != null ? cuentaMuni : "-");
-
-
+        lote.setCuentaEmos(cuentaEmos);
+        lote.setCuentaMuni(cuentaMuni);
+        lote.setDomicilio(domicilio != null ? domicilio : "-");
+        
         loteRepository.save(lote);
 
         Integer idLoteo = lote.getLoteo().getIdLoteo();

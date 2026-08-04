@@ -39,6 +39,15 @@ public class Lote {
     @Column(name = "cuentaMuni", length = 9)
     private String cuentaMuni;
 
+    @Column(name = "domicilio", length = 200)
+    private String domicilio;
+
+    @Column(name = "manzana", length = 5)
+    private String manzana;
+
+    @Column(name = "numeroLote", length = 5)
+    private String numeroLote;
+
     // --- ATRIBUTOS VIEJOS (Los mantenemos por ahora para no romper el Controlador) ---
     @Column(length = 50)
     private String estado;
@@ -98,4 +107,12 @@ public class Lote {
     public String getCuentaMuni() { return cuentaMuni; }
     public void setCuentaMuni(String cuentaMuni) { this.cuentaMuni = cuentaMuni; }     
 
+    public String getDomicilio() { return domicilio != null ? domicilio : "-"; }
+    public void setDomicilio(String domicilio) { this.domicilio = domicilio; }
+
+    public String getManzana() { return manzana; }
+    public void setManzana(String manzana) { this.manzana = manzana; }
+
+    public String getNumeroLote() { return numeroLote; }
+    public void setNumeroLote(String numeroLote) { this.numeroLote = numeroLote; }
 }

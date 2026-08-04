@@ -121,12 +121,22 @@
                     </div>
                     <hr class="my-2">
                     <div class="row mb-2">
+                        <div class="col-sm-4 text-muted fw-bold">Manzana:</div>
+                        <div class="col-sm-8 d-flex align-items-center">
+                            <span>{{#manzana}}{{manzana}}{{/manzana}}{{^manzana}}<span class="text-muted fst-italic">-</span>{{/manzana}}</span>
+                            <span class="text-muted fw-bold ms-4 me-2">Lote:</span>
+                            <span>{{#numeroLote}}{{numeroLote}}{{/numeroLote}}{{^numeroLote}}<span class="text-muted fst-italic">-</span>{{/numeroLote}}</span>
+                        </div>
+                    </div>
+                    <hr class="my-2">
+                    <div class="row mb-2">
                         <div class="col-sm-4 text-muted fw-bold">Superficies (m²):</div>
                         <div class="col-sm-8">
                             <strong>Total:</strong> {{#superficie}}{{superficie}}{{/superficie}}{{^superficie}}0{{/superficie}} <br>
                             <strong>Cubierta:</strong> {{#superficieCubierta}}{{superficieCubierta}}{{/superficieCubierta}}{{^superficieCubierta}}0{{/superficieCubierta}}
                         </div>
                     </div>
+                    <hr class="my-2">
                     <div class="row mb-2">
                         <div class="col-sm-4 text-muted fw-bold">Cuenta EMOS:</div>
                         <div class="col-sm-8">{{#cuentaEmos}}{{cuentaEmos}}{{/cuentaEmos}}{{^cuentaEmos}}<span class="text-muted fst-italic">0</span>{{/cuentaEmos}}</div>
@@ -134,6 +144,11 @@
                     <div class="row mb-2">
                         <div class="col-sm-4 text-muted fw-bold">Cuenta Municipal:</div>    
                         <div class="col-sm-8">{{#cuentaMuni}}{{cuentaMuni}}{{/cuentaMuni}}{{^cuentaMuni}}<span class="text-muted fst-italic">0</span>{{/cuentaMuni}}</div>
+                    </div>
+                    <hr class="my-2">
+                    <div class="row mb-2">
+                        <div class="col-sm-4 text-muted fw-bold">Domicilio:</div>    
+                        <div class="col-sm-8">{{#domicilio}}{{domicilio}}{{/domicilio}}{{^domicilio}}<span class="text-muted fst-italic">No cargado</span>{{/domicilio}}</div>
                     </div>
                     <hr class="my-2">
                     <div class="row mb-2">
