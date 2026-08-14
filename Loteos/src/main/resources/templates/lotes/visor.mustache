@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="icon" type="image/png" href="/images/icono-buffarini.png">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-textpath@1.2.3/leaflet.textpath.min.js"></script>
     
     <style>
         /* El contenedor principal ocupa el alto disponible de la pantalla */
@@ -24,6 +25,18 @@
             height: 100%;
             overflow-y: auto; /* Si hay mucha info, permite scroll */
         }
+        /* Estilo para los nombres de las calles imitando QGIS */
+        .etiqueta-calle {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            font-weight: bold;
+            font-size: 13px; 
+            color: #343a40; 
+            text-shadow: 2px 2px 2px #ffffff, -2px -2px 2px #ffffff, 2px -2px 2px #ffffff, -2px 2px 2px #ffffff, 0px 0px 4px #ffffff;
+            white-space: nowrap;
+        }
+
     </style>
 </head>
 <body class="bg-light">
@@ -126,9 +139,24 @@
 
         // 4. VARIABLES DE ESTILO (¡Esto es lo que faltaba y daba el error!)
         var estiloEstandar = { color: "#dc3545", weight: 1.5, fillColor: "#dc3545", fillOpacity: 0.15 };
+        
         var estiloSeleccionado = { color: "#0d6efd", weight: 3.5, fillColor: "#0d6efd", fillOpacity: 0.5 };
         var capaSeleccionada = null;
         var capaLotesGeoJson = null;
+        // Estilos adicionales
+        var estiloEspacioVerde = { color: "#198754", weight: 1.5, fillColor: "#198754", fillOpacity: 0.35 };
+
+        // Función que decide el estilo según el tipo de lote
+        function obtenerEstiloPorTipo(feature) {
+            var desig = (feature.properties.desig_ofic || "").toString().toUpperCase();
+            var nomenclatura = (feature.properties.Nomenclatu || "").toString();
+
+            if (desig.includes("ESPACIO VERDE")) {
+                return estiloEspacioVerde;
+            }
+            // Podrías sumar más categorías acá, por ejemplo baldíos, reservas, etc.
+            return estiloEstandar;
+        }      
 
         // 5. FUNCIONES AUXILIARES
         function obtenerCuentaPlano(propiedades) {
@@ -193,7 +221,9 @@
             })
             .then(data => {
                 capaLotesGeoJson = L.geoJSON(data, {
-                    style: estiloEstandar,
+                    style: function(feature) {
+                        return obtenerEstiloPorTipo(feature);
+                    },
                     onEachFeature: function (feature, layer) {
                         layer.on('click', function(e) {
                             seleccionarLote(layer, feature.properties);
@@ -237,7 +267,75 @@
                     }
                 }
             })
-            .catch(error => console.error("Error al renderizar el mapa:", error));
+        .catch(error => console.error("Error al renderizar el mapa:", error));
+
+        // 7. CARGA DE LA CAPA DE CALLES Y ETIQUETAS
+        let urlCalles = '';
+        if ({{etapaSeleccionada}} !== false) {
+            urlCalles = '/calles/calles-etapa-' + {{etapaSeleccionada}} + '.geojson';
+        } else {
+            urlCalles = '/calles/calles-loteo-{{loteo.idLoteo}}.geojson';
+        }
+
+        let capaCalles = null; // Variable para controlar la capa
+
+        fetch(urlCalles)
+            .then(response => {
+                if (!response.ok) throw new Error("Error al cargar calles.");
+                return response.json();
+            })
+            .then(data => {
+                capaCalles = L.geoJSON(data, {
+                    style: function (feature) {
+                        return { weight: 0, opacity: 0 };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        let nombreCalle = feature.properties.Calle; 
+                        
+                        if (nombreCalle) {
+                            // IMPORTANTE: Asegurate de no tener ningún "layer.bindTooltip" acá.
+                            // Usamos exclusivamente setText
+                            layer.setText(nombreCalle, {
+                                center: true,
+                                offset: 5,
+                                attributes: {
+                                    'font-weight': 'bold',
+                                    'font-size': '14',
+                                    'fill': '#343a40',
+                                    'stroke': '#ffffff',
+                                    'stroke-width': '4',
+                                    'paint-order': 'stroke'
+                                }
+                            });
+                        }
+                    }
+                });
+
+                // Solo la agregamos al mapa si arrancamos con un zoom cercano
+                if (map.getZoom() >= 15) {
+                    capaCalles.addTo(map);
+                }
+            })
+            .catch(error => console.warn(error));
+
+        // 8. CONTROL DE VISIBILIDAD (Saca o pone la capa entera)
+        map.on('zoomend', function() {
+            if (!capaCalles) return; // Si la capa no cargó, no hace nada
+
+            let zoomActual = map.getZoom();
+            
+            if (zoomActual < 18) { 
+                // Si nos alejamos, sacamos la capa del mapa
+                if (map.hasLayer(capaCalles)) {
+                    map.removeLayer(capaCalles);
+                }
+            } else {
+                // Si nos acercamos, la volvemos a poner
+                if (!map.hasLayer(capaCalles)) {
+                    map.addLayer(capaCalles);
+                }
+            }
+        });
     </script>
 </body>
 </html>

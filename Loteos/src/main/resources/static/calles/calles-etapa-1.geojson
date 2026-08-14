@@ -1,0 +1,17 @@
+{
+"type": "FeatureCollection",
+"name": "calles-norte",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 2, "Calle": "CALLE LITO FICCO" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.407328778910426, -33.112744852087026 ], [ -64.407320957391264, -33.114934877454893 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 3, "Calle": "CALLE RÍO ACHIRAS OESTE" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.414297752491734, -33.113034248296351 ], [ -64.414289930972572, -33.112799602721225 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 4, "Calle": "CALLE RÍO LAS CAÑITAS" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.41185743851041, -33.113706898945054 ], [ -64.411849616991233, -33.112799602721225 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 5, "Calle": "PASAJE RÍO SAN BARTOLOMÉ OESTE" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.410809354941506, -33.113214143237279 ], [ -64.40958137643166, -33.11320632171811 ], [ -64.40958137643166, -33.11320632171811 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 8, "Calle": "PASAJE RÍO SAN BARTOLOMÉ ESTE" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.409174657434775, -33.11320632171811 ], [ -64.407844999175708, -33.11320632171811 ], [ -64.407844999175708, -33.11320632171811 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 1, "Calle": "CALLE RÍO LAS LAJAS" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.414714269135118, -33.113194075498882 ], [ -64.411811200511949, -33.113885282313923 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 10, "Calle": "CALLE RÍO LAS LAJAS" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.411457504129473, -33.113949915796745 ], [ -64.407914259064839, -33.114845533091682 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 9, "Calle": "PASAJE RÍO LOS REARTES" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.409172290086445, -33.114055772213213 ], [ -64.40789532001169, -33.114059339168726 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 6, "Calle": "BOULEVARD LOMA ALTA" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.409492703939037, -33.113039554979657 ], [ -64.409478502113899, -33.113799352624127 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 7, "Calle": "BOULEVARD LOMA ALTA" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -64.409269082799284, -33.112982662773383 ], [ -64.409262412428731, -33.113898171131829 ] ] ] } }
+]
+}
