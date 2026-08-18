@@ -17,6 +17,9 @@ import com.example.app.models.Etapa;
 import com.example.app.models.Lote;
 import com.example.app.models.Loteo;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+
 import java.util.List;
 
 @Controller
@@ -136,7 +139,7 @@ public class LoteoController {
     // Mostrar el visor web del mapa interactivo
     @GetMapping("/loteos/{id}/visor")
     public String verMapa(@PathVariable("id") Integer id,
-            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa, Authentication authentication, 
             Model model) {
         Loteo loteo = loteoRepository.findById(id).orElse(null);
         model.addAttribute("loteo", loteo);
@@ -146,6 +149,22 @@ public class LoteoController {
 
         model.addAttribute("idEtapa", idEtapa != null ? idEtapa : false);
         model.addAttribute("etapaSeleccionada", idEtapa != null ? idEtapa : false);
+
+        boolean esAdmin = false;
+        boolean esCliente = false;
+
+        if (authentication != null) {
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                if (authority.getAuthority().equals("ROLE_ADMIN")) {
+                    esAdmin = true;
+                } else if (authority.getAuthority().equals("ROLE_CLIENTE")) {
+                    esCliente = true;
+                }
+            }
+        }
+
+        model.addAttribute("esAdmin", esAdmin);
+        model.addAttribute("esCliente", esCliente);
 
         return "lotes/visor";
     }
@@ -341,10 +360,7 @@ public class LoteoController {
             @PathVariable("id") Integer id,
             @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
             @RequestParam(value = "buscar", required = false) String buscar,
-            @RequestParam(value = "idLoteSeleccionado", required = false) Integer idLoteSeleccionado, // <-- ACÁ
-                                                                                                      // AGREGAMOS EL
-                                                                                                      // RECEPTOR DEL
-                                                                                                      // CLIC
+            @RequestParam(value = "idLoteSeleccionado", required = false) Integer idLoteSeleccionado,   
             Model model) {
 
         Loteo loteo = loteoRepository.findById(id).orElse(null);
@@ -405,7 +421,7 @@ public class LoteoController {
     @GetMapping("/cliente/loteos/{id}/visor")
     public String verMapaCliente(
             @PathVariable("id") Integer id,
-            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa, Authentication authentication,
             Model model) {
 
         Loteo loteo = loteoRepository.findById(id).orElse(null);
@@ -422,8 +438,24 @@ public class LoteoController {
 
         // Mantenemos tu excelente lógica para el JavaScript de Leaflet
         model.addAttribute("etapaSeleccionada", idEtapa != null ? idEtapa : false);
+
+        boolean esAdmin = false;
+        boolean esCliente = false;
+
+        if (authentication != null) {
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                if (authority.getAuthority().equals("ROLE_ADMIN")) {
+                    esAdmin = true;
+                } else if (authority.getAuthority().equals("ROLE_CLIENTE")) {
+                    esCliente = true;
+                }
+            }
+        }
+
+        model.addAttribute("esAdmin", esAdmin);
+        model.addAttribute("esCliente", esCliente);
         
-        return "cliente/visor-cliente";
+        return "lotes/visor";
     }
 
     @GetMapping("/cliente/loteos/{id}/datos-mapa")

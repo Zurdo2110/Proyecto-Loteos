@@ -44,7 +44,13 @@
     <nav class="navbar navbar-dark bg-dark mb-3 shadow-sm">
         <div class="container-fluid px-4 d-flex justify-content-between">
             <span class="navbar-brand mb-0 h1 d-flex align-items-center gap-3"> <img src="/images/logo_badge.png" alt="Logo" height="40"> 🗺️ Visor Parcelario Profesional</span>
-            <a href="/loteos/{{loteo.idLoteo}}/lotes{{#etapaSeleccionada}}?idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}" class="btn btn-outline-light btn-sm">Volver a la Lista</a>
+            {{#esAdmin}}
+                <a href="/loteos/{{loteo.idLoteo}}/lotes{{#etapaSeleccionada}}?idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}" class="btn btn-outline-light btn-sm">Volver a la Lista</a>
+            {{/esAdmin}}
+
+            {{#esCliente}}
+                <a href="/cliente/loteos/{{loteo.idLoteo}}/lotes{{#etapaSeleccionada}}?idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}" class="btn btn-outline-light btn-sm">Volver a la Lista</a>
+            {{/esCliente}}
         </div>
     </nav>
 
@@ -148,8 +154,8 @@
 
         // Función que decide el estilo según el tipo de lote
         function obtenerEstiloPorTipo(feature) {
-            var desig = (feature.properties.desig_ofic || "").toString().toUpperCase();
-            var nomenclatura = (feature.properties.Nomenclatu || "").toString();
+            var desig = (feature.properties.desig_ofic || feature.properties.designacion_oficial || feature.properties.designacionOficial ||"").toString().toUpperCase();
+            var nomenclatura = (feature.properties.nomenclatura || "").toString();
 
             if (desig.includes("ESPACIO VERDE")) {
                 return estiloEspacioVerde;
