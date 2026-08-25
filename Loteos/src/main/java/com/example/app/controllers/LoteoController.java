@@ -261,6 +261,7 @@ public class LoteoController {
             // Le pisamos los datos viejos con los que vinieron del formulario
             loteExistente.setNumeroCuenta(loteActualizado.getNumeroCuenta());
             loteExistente.setNomenclatura(loteActualizado.getNomenclatura());
+            loteExistente.setMatricula(loteActualizado.getMatricula());
             loteExistente.setSuperficie(loteActualizado.getSuperficie());
             loteExistente.setDesignacionOficial(loteActualizado.getDesignacionOficial());
             loteExistente.setSuperficieCubierta(loteActualizado.getSuperficieCubierta());

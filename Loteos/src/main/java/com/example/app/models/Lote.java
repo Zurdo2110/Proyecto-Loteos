@@ -26,6 +26,9 @@ public class Lote {
     @Column(name = "designacion_oficial", length = 150)
     private String designacionOficial;
 
+    @Column (name = "matricula", length = 10)
+    private String matricula;
+
     // Superficie total del terreno
     private Double superficie;
 
@@ -85,6 +88,9 @@ public class Lote {
 
     public String getDesignacionOficial() { return designacionOficial != null ? designacionOficial : "Sin designar"; }
     public void setDesignacionOficial(String designacionOficial) { this.designacionOficial = designacionOficial; }
+
+    public String getMatricula() { return matricula != null ? matricula : "-"; }
+    public void setMatricula(String matricula) { this.matricula = matricula; }
 
     public Double getSuperficie() { return superficie != null ? superficie : 0.0; }
     public void setSuperficie(Double superficie) { this.superficie = superficie; }
