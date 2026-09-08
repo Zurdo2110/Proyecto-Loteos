@@ -209,18 +209,6 @@ public class LoteoController {
         return "redirect:/loteos/" + id + "/lotes";
     }
 
-    // Ver los detalles completos de una parcela en particular
-    @GetMapping("/lotes/{id}")
-    public String verDetalleLote(@PathVariable("id") Integer id, Model model) {
-        // Buscamos el lote por su ID
-        Lote lote = loteRepository.findById(id).orElse(null);
-
-        // Lo mandamos a la vista
-        model.addAttribute("lote", lote);
-
-        return "lotes/detalle-lote";
-    }
-
     // --- ELIMINAR ---
     @PostMapping("/lotes/{id}/eliminar")
     public String eliminarLote(@PathVariable("id") Integer id) {
@@ -240,20 +228,28 @@ public class LoteoController {
 
     // --- MODIFICAR (Mostrar Formulario) ---
     @GetMapping("/lotes/{id}/editar")
-    public String mostrarFormularioEditar(@PathVariable("id") Integer id, Model model) {
-        Lote lote = loteRepository.findById(id).orElse(null);
-        model.addAttribute("lote", lote);
-
-        if (lote != null) {
-            model.addAttribute("loteo", lote.getLoteo());
+    public String mostrarFormularioEditar(
+            @PathVariable("id") Integer id,
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
+            Model model) {
+        Lote lote = loteRepository.findByIdWithLoteo(id).orElse(null);
+        if (lote == null) {
+            return "redirect:/loteos";
         }
+
+        model.addAttribute("lote", lote);
+        model.addAttribute("loteo", lote.getLoteo());
+        model.addAttribute("etapaSeleccionada", idEtapa);
 
         return "lotes/formulario-editar-lote";
     }
 
     // --- MODIFICAR (Guardar los cambios) ---
     @PostMapping("/lotes/{id}/editar")
-    public String actualizarLote(@PathVariable("id") Integer id, Lote loteActualizado) {
+    public String actualizarLote(
+            @PathVariable("id") Integer id,
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
+            Lote loteActualizado) {
         // Buscamos el lote original en PostgreSQL
         Lote loteExistente = loteRepository.findById(id).orElse(null);
 
@@ -277,8 +273,12 @@ public class LoteoController {
             // INSERT)
             loteRepository.save(loteExistente);
 
-            // Volvemos a la ficha de detalles para ver cómo quedó
-            return "redirect:/lotes/" + id;
+            Integer idLoteo = loteExistente.getLoteo().getIdLoteo();
+            String redirect = "redirect:/loteos/" + idLoteo + "/lotes";
+            if (idEtapa != null) {
+                redirect += "?idEtapa=" + idEtapa;
+            }
+            return redirect;
         }
         return "redirect:/loteos";
     }
@@ -287,6 +287,10 @@ public class LoteoController {
     @GetMapping("/loteos/{id}/editar")
     public String mostrarFormularioEditarLoteo(@PathVariable("id") Integer id, Model model) {
         Loteo loteo = loteoRepository.findById(id).orElse(null);
+        if (loteo == null) {
+            return "redirect:/loteos";
+        }
+
         model.addAttribute("loteo", loteo);
         return "loteos/formulario-editar-loteo";
     }
@@ -467,13 +471,18 @@ public class LoteoController {
 
     // --- MODIFICAR (Mostrar Formulario) ---
     @GetMapping("/cliente/lotes/{idLote}/editar")
-    public String mostrarFormularioEditarCliente(@PathVariable("idLote") Integer idLote, Model model) {
-        Lote lote = loteRepository.findById(idLote).orElse(null);
-        model.addAttribute("lote", lote);
-
-        if (lote != null) {
-            model.addAttribute("loteo", lote.getLoteo());
+    public String mostrarFormularioEditarCliente(
+            @PathVariable("idLote") Integer idLote,
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
+            Model model) {
+        Lote lote = loteRepository.findByIdWithLoteo(idLote).orElse(null);
+        if (lote == null) {
+            return "redirect:/";
         }
+
+        model.addAttribute("lote", lote);
+        model.addAttribute("loteo", lote.getLoteo());
+        model.addAttribute("etapaSeleccionada", idEtapa);
 
         return "cliente/formulario-cliente-editar-lote";
     }
@@ -490,7 +499,7 @@ public class LoteoController {
             @RequestParam(value = "cuentaMuni", required = false) String cuentaMuni,
             @RequestParam(value = "domicilio", required = false) String domicilio) {
 
-        Lote lote = loteRepository.findById(idLote).orElse(null);
+        Lote lote = loteRepository.findByIdWithLoteo(idLote).orElse(null);
 
         if (lote == null) {
             // el lote no existe, no hay nada que guardar
