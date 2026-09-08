@@ -33,5 +33,8 @@ public interface LoteRepository extends JpaRepository<Lote, Integer> {
 
     Optional<Lote> findByNumeroCuenta(String numeroCuenta);
 
+    @Query("SELECT l FROM Lote l JOIN FETCH l.loteo WHERE l.idLote = :idLote")
+    Optional<Lote> findByIdWithLoteo(@Param("idLote") Integer idLote);
+
     boolean existsByEtapaIdEtapa(Integer idEtapa);
 }

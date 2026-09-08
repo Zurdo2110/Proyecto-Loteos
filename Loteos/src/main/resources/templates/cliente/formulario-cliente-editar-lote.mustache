@@ -34,7 +34,7 @@
                                 </div>
                                 <div class="col-md-6">  
                                     <label for="cuentaMuni" class="form-label fw-bold">Cuenta Municipal</label>
-                                    <input type="number" class="form-control" id="cuentaMuni" name="cuentaMuni" value="{{lote.cuentaMuni}}">       \
+                                    <input type="number" class="form-control" id="cuentaMuni" name="cuentaMuni" value="{{lote.cuentaMuni}}">
                                 </div>
                                 <div class="col-md-6">  
                                     <label for="domicilio" class="form-label fw-bold">Domicilio</label>
@@ -50,7 +50,7 @@
                             </div>
 
                             <div class="d-flex justify-content-between">
-                                <a href="/cliente/loteos/{{lote.loteo.idLoteo}}/lotes{{#etapaSeleccionada}}?idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}" class="btn btn-outline-secondary">Cancelar</a>
+                                <a href="/cliente/loteos/{{loteo.idLoteo}}/lotes{{#etapaSeleccionada}}?idEtapa={{etapaSeleccionada}}{{/etapaSeleccionada}}" class="btn btn-outline-secondary">Cancelar</a>
                                 <button type="submit" class="btn btn-warning fw-bold">Guardar Cambios</button>
                             </div>
                         </form>

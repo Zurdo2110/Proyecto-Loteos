@@ -16,6 +16,9 @@
                     </div>
                     <div class="card-body">
                         <form action="/lotes/{{lote.idLote}}/editar" method="post">
+                            {{#etapaSeleccionada}}
+                            <input type="hidden" name="idEtapa" value="{{etapaSeleccionada}}">
+                            {{/etapaSeleccionada}}
                             
                             <div class="row mb-3">
                                 <div class="col-md-6">
@@ -55,6 +58,21 @@
                             </div>
 
                             <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="matricula" class="form-label fw-bold">Matrícula</label>
+                                    <input type="text" class="form-control" id="matricula" name="matricula" value="{{lote.matricula}}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="manzana" class="form-label fw-bold">Manzana</label>
+                                    <input type="text" class="form-control" id="manzana" name="manzana" value="{{lote.manzana}}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="numeroLote" class="form-label fw-bold">Número de Lote</label>
+                                    <input type="text" class="form-control" id="numeroLote" name="numeroLote" value="{{lote.numeroLote}}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="cuentaEmos" class="form-label fw-bold">Cuenta EMOS</label>
                                     <input type="number" class="form-control" id="cuentaEmos" name="cuentaEmos" value="{{lote.cuentaEmos}}">
@@ -76,7 +94,7 @@
                             </div>
 
                             <div class="d-flex justify-content-between">
-                                <a href="/loteos/{{lote.loteo.idLoteo}}/lotes" class="btn btn-outline-secondary">Cancelar</a>
+                                <a href="/loteos/{{loteo.idLoteo}}/lotes" class="btn btn-outline-secondary">Cancelar</a>
                                 <button type="submit" class="btn btn-warning fw-bold">Guardar Cambios</button>
                             </div>
                         </form>
@@ -86,8 +104,5 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('estado').value = '{{lote.estado}}';
-    </script>
 </body>
 </html>

@@ -98,6 +98,9 @@ public class Lote {
     public Double getSuperficieCubierta() { return superficieCubierta != null ? superficieCubierta : 0.0; }
     public void setSuperficieCubierta(Double superficieCubierta) { this.superficieCubierta = superficieCubierta; }
 
+    public String getEstado() { return estado != null ? estado : ""; }
+    public void setEstado(String estado) { this.estado = estado; }
+
     public String getObservaciones() { return observaciones != null ? observaciones : "-"; }
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
@@ -107,18 +110,18 @@ public class Lote {
     public Etapa getEtapa() { return etapa; }
     public void setEtapa(Etapa etapa) { this.etapa = etapa; }
 
-    public String getCuentaEmos() { return cuentaEmos; }
+    public String getCuentaEmos() { return cuentaEmos != null ? cuentaEmos : ""; }
     public void setCuentaEmos(String cuentaEmos) { this.cuentaEmos = cuentaEmos; }
 
-    public String getCuentaMuni() { return cuentaMuni; }
+    public String getCuentaMuni() { return cuentaMuni != null ? cuentaMuni : ""; }
     public void setCuentaMuni(String cuentaMuni) { this.cuentaMuni = cuentaMuni; }     
 
     public String getDomicilio() { return domicilio != null ? domicilio : "-"; }
     public void setDomicilio(String domicilio) { this.domicilio = domicilio; }
 
-    public String getManzana() { return manzana; }
+    public String getManzana() { return manzana != null ? manzana : ""; }
     public void setManzana(String manzana) { this.manzana = manzana; }
 
-    public String getNumeroLote() { return numeroLote; }
+    public String getNumeroLote() { return numeroLote != null ? numeroLote : ""; }
     public void setNumeroLote(String numeroLote) { this.numeroLote = numeroLote; }
 }
