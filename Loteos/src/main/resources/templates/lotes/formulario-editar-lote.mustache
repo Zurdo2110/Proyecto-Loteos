@@ -15,6 +15,9 @@
                         <h4 class="mb-0">Modificar Datos - Cuenta: {{lote.numeroCuenta}}</h4>
                     </div>
                     <div class="card-body">
+                        {{#errores}}
+                        <div class="alert alert-danger" role="alert">{{.}}</div>
+                        {{/errores}}
                         <form action="/lotes/{{lote.idLote}}/editar" method="post">
                             {{#etapaSeleccionada}}
                             <input type="hidden" name="idEtapa" value="{{etapaSeleccionada}}">

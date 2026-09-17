@@ -1,6 +1,5 @@
 package com.example.app.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,23 +15,42 @@ import com.example.app.repositories.LoteRepository;
 import com.example.app.models.Etapa;
 import com.example.app.models.Lote;
 import com.example.app.models.Loteo;
-
+import com.example.app.services.LoteService;
+import com.example.app.services.LoteoService;
+import com.example.app.services.EtapaService;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class LoteoController {
 
-    @Autowired
-    private LoteoRepository loteoRepository;
+    private final LoteoRepository loteoRepository;
+    private final LoteRepository loteRepository;
+    private final EtapaRepository etapaRepository;
+    private final LoteService loteService;
+    private final LoteoService loteoService;
+    private final EtapaService etapaService;
 
-    @Autowired
-    private LoteRepository loteRepository;
-
-    @Autowired
-    private EtapaRepository etapaRepository;
+    public LoteoController(
+            LoteoRepository loteoRepository,
+            LoteRepository loteRepository,
+            EtapaRepository etapaRepository,
+            LoteService loteService,
+            LoteoService loteoService,
+            EtapaService etapaService) {
+        this.loteoRepository = loteoRepository;
+        this.loteRepository = loteRepository;
+        this.etapaRepository = etapaRepository;
+        this.loteService = loteService;
+        this.loteoService = loteoService;
+        this.etapaService = etapaService;
+    }
 
     // --- RUTAS DE LOTEOS ---
 
@@ -67,8 +85,15 @@ public class LoteoController {
 
     // Guardar el loteo nuevo en la base de datos
     @PostMapping("/loteos")
-    public String guardarLoteo(Loteo loteo) {
-        loteoRepository.save(loteo);
+    public String guardarLoteo(
+            @Valid Loteo loteo,
+            BindingResult bindingResult,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            addValidationErrors(model, bindingResult);
+            return "loteos/formulario-loteo";
+        }
+        loteoService.create(loteo);
         return "redirect:/loteos";
     }
 
@@ -187,43 +212,27 @@ public class LoteoController {
 
     // Guardar el lote en la base de datos y enlazarlo
     @PostMapping("/loteos/{id}/lotes")
-    public String guardarLote(@PathVariable("id") Integer id, Lote lote,
-            @RequestParam(value = "idEtapa", required = false) Integer idEtapa) {
-        // 1. Buscamos el loteo al que le queremos agregar esta parcela
-        Loteo loteo = loteoRepository.findById(id).orElse(null);
-
-        if (loteo != null) {
-            // 2. Le decimos al lote recién creado quién es su "padre"
-            lote.setLoteo(loteo);
-
-            if (idEtapa != null) {
-                Etapa etapa = etapaRepository.findById(idEtapa).orElse(null);
-                lote.setEtapa(etapa);
-            }
-
-            // 3. Guardamos el lote en PostgreSQL
-            loteRepository.save(lote);
+    public String guardarLote(
+            @PathVariable("id") Integer id,
+            @Valid Lote lote,
+            BindingResult bindingResult,
+            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            prepararFormularioLote(id, lote, model);
+            addValidationErrors(model, bindingResult);
+            return "lotes/formulario-lote";
         }
-
-        // 4. Redireccionamos a la lista de lotes de este proyecto
+        loteService.create(lote, id, idEtapa);
         return "redirect:/loteos/" + id + "/lotes";
     }
 
     // --- ELIMINAR ---
     @PostMapping("/lotes/{id}/eliminar")
     public String eliminarLote(@PathVariable("id") Integer id) {
-        // Buscamos el lote antes de borrarlo para saber a qué loteo pertenecía
-        Lote lote = loteRepository.findById(id).orElse(null);
-        if (lote != null) {
-            Integer idLoteo = lote.getLoteo().getIdLoteo();
-
-            // Lo fulminamos de la base de datos
-            loteRepository.deleteById(id);
-
-            // Volvemos a la lista de lotes de ese proyecto
-            return "redirect:/loteos/" + idLoteo + "/lotes";
-        }
-        return "redirect:/loteos";
+        return loteService.delete(id)
+                .map(idLoteo -> "redirect:/loteos/" + idLoteo + "/lotes")
+                .orElse("redirect:/loteos");
     }
 
     // --- MODIFICAR (Mostrar Formulario) ---
@@ -249,32 +258,26 @@ public class LoteoController {
     public String actualizarLote(
             @PathVariable("id") Integer id,
             @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
-            Lote loteActualizado) {
-        // Buscamos el lote original en PostgreSQL
-        Lote loteExistente = loteRepository.findById(id).orElse(null);
-
-        if (loteExistente != null) {
-            // Le pisamos los datos viejos con los que vinieron del formulario
-            loteExistente.setNumeroCuenta(loteActualizado.getNumeroCuenta());
-            loteExistente.setNomenclatura(loteActualizado.getNomenclatura());
-            loteExistente.setMatricula(loteActualizado.getMatricula());
-            loteExistente.setSuperficie(loteActualizado.getSuperficie());
-            loteExistente.setDesignacionOficial(loteActualizado.getDesignacionOficial());
-            loteExistente.setSuperficieCubierta(loteActualizado.getSuperficieCubierta());
-            loteExistente.setObservaciones(loteActualizado.getObservaciones());
-            loteExistente.setTitular(loteActualizado.getTitular());
-            loteExistente.setCuentaEmos(loteActualizado.getCuentaEmos());
-            loteExistente.setCuentaMuni(loteActualizado.getCuentaMuni());
-            loteExistente.setDomicilio(loteActualizado.getDomicilio());
-            loteExistente.setManzana(loteActualizado.getManzana());
-            loteExistente.setNumeroLote(loteActualizado.getNumeroLote());
-
-            // Guardamos (Como ya tiene un ID, Spring Boot sabe que es un UPDATE y no un
-            // INSERT)
-            loteRepository.save(loteExistente);
-
-            Integer idLoteo = loteExistente.getLoteo().getIdLoteo();
-            String redirect = "redirect:/loteos/" + idLoteo + "/lotes";
+            @Valid Lote loteActualizado,
+            BindingResult bindingResult,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            Lote loteExistente = loteRepository.findByIdWithLoteo(id).orElse(null);
+            if (loteExistente == null) {
+                return "redirect:/loteos";
+            }
+            loteActualizado.setIdLote(id);
+            loteActualizado.setLoteo(loteExistente.getLoteo());
+            model.addAttribute("lote", loteActualizado);
+            model.addAttribute("loteo", loteExistente.getLoteo());
+            model.addAttribute("etapaSeleccionada", idEtapa);
+            addValidationErrors(model, bindingResult);
+            return "lotes/formulario-editar-lote";
+        }
+        Optional<Integer> idLoteo = loteService.update(id, loteActualizado);
+        if (idLoteo.isPresent()) {
+            Integer loteoId = idLoteo.get();
+            String redirect = "redirect:/loteos/" + loteoId + "/lotes";
             if (idEtapa != null) {
                 redirect += "?idEtapa=" + idEtapa;
             }
@@ -297,13 +300,18 @@ public class LoteoController {
 
     // --- EDITAR LOTEO (Guardar los cambios en la BD) ---
     @PostMapping("/loteos/{id}/editar")
-    public String actualizarLoteo(@PathVariable("id") Integer id, Loteo loteoActualizado) {
-        Loteo loteoExistente = loteoRepository.findById(id).orElse(null);
-        if (loteoExistente != null) {
-            // Pisamos el nombre viejo con el nuevo
-            loteoExistente.setNombre(loteoActualizado.getNombre());
-            loteoRepository.save(loteoExistente);
+    public String actualizarLoteo(
+            @PathVariable("id") Integer id,
+            @Valid Loteo loteoActualizado,
+            BindingResult bindingResult,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            loteoActualizado.setIdLoteo(id);
+            model.addAttribute("loteo", loteoActualizado);
+            addValidationErrors(model, bindingResult);
+            return "loteos/formulario-editar-loteo";
         }
+        loteoService.update(id, loteoActualizado);
         // Lo mandamos a ver cómo quedó el título cambiado
         return "redirect:/loteos/" + id + "/lotes";
     }
@@ -311,16 +319,7 @@ public class LoteoController {
     // --- ELIMINAR LOTEO (A prueba de balas) ---
     @PostMapping("/loteos/{id}/eliminar")
     public String eliminarLoteo(@PathVariable("id") Integer id) {
-        // 1. Primero buscamos todas las parcelas que estén adentro de este loteo
-        List<Lote> lotesAsociados = loteRepository.findByLoteoIdLoteo(id);
-
-        // 2. Las fulminamos para que PostgreSQL no tire error de foreign key
-        loteRepository.deleteAll(lotesAsociados);
-
-        // 3. Ahora sí podemos borrar el loteo vacío sin problemas
-        loteoRepository.deleteById(id);
-
-        // Volvemos a la pantalla principal
+        loteoService.delete(id);
         return "redirect:/loteos";
     }
 
@@ -347,182 +346,37 @@ public class LoteoController {
     }
 
     @PostMapping("/loteos/{id}/etapas/nueva")
-    public String guardarEtapa(@PathVariable("id") Integer id, Etapa etapa) {
-        Loteo loteo = loteoRepository.findById(id).orElse(null);
-        if (loteo != null) {
-            etapa.setLoteo(loteo); // Enlazamos la etapa al loteo actual
-            etapaRepository.save(etapa);
+    public String guardarEtapa(
+            @PathVariable("id") Integer id,
+            @Valid Etapa etapa,
+            BindingResult bindingResult,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            Loteo loteo = loteoRepository.findById(id).orElse(null);
+            if (loteo == null) {
+                return "redirect:/loteos";
+            }
+            model.addAttribute("loteo", loteo);
+            addValidationErrors(model, bindingResult);
+            return "lotes/formulario-etapa";
         }
+        etapaService.create(etapa, id);
         return "redirect:/loteos/" + id + "/lotes"; // Volvemos a la lista
     }
 
-    // ==========================================
-    // APARTADO EXCLUSIVO PARA CLIENTES
-    // ==========================================
-
-    @GetMapping("/cliente/loteos/{id}/lotes")
-    public String verLotesCliente(
-            @PathVariable("id") Integer id,
-            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
-            @RequestParam(value = "buscar", required = false) String buscar,
-            @RequestParam(value = "idLoteSeleccionado", required = false) Integer idLoteSeleccionado,   
-            Model model) {
-
+    private void prepararFormularioLote(Integer id, Lote lote, Model model) {
         Loteo loteo = loteoRepository.findById(id).orElse(null);
         model.addAttribute("loteo", loteo);
-
-        // Verificamos si este loteo tiene etapas
-        List<Etapa> todasLasEtapas = etapaRepository.findByLoteoIdLoteo(id);
-        
-        List<Etapa> etapasActivas = todasLasEtapas.stream()
-                .filter(etapa -> loteRepository.existsByEtapaIdEtapa(etapa.getIdEtapa()))
-                .toList();
-        
-        
-        boolean tieneEtapas = !etapasActivas.isEmpty();
-        model.addAttribute("tieneEtapas", tieneEtapas);
-        model.addAttribute("etapas", etapasActivas);
-        model.addAttribute("etapaSeleccionada", idEtapa);
-        model.addAttribute("mostrarContenido", !tieneEtapas || idEtapa != null); // Si tiene etapas y no seleccionó ninguna, no mostramos contenido
-
-        // Traemos los lotes con la misma lógica inteligente pero para la vista del
-        // cliente      
-        List<Lote> lotes;
-        if (tieneEtapas && idEtapa != null) {
-            // ESTAMOS ADENTRO DE UNA ETAPA
-            if (buscar != null && !buscar.isBlank()) {
-                // Si escribió algo en el buscador, filtramos solo en esta etapa
-                String buscarSql = "%" + buscar.trim().replaceAll("\\s+", "%") + "%";
-                lotes = loteRepository.buscarPorEtapaYTermino(idEtapa, buscarSql);
-            } else {
-                // Si no buscó nada, mostramos todos los de la etapa
-                lotes = loteRepository.findByEtapaIdEtapa(idEtapa);
-            }
-        } else if (tieneEtapas && idEtapa == null) {
-            // Tiene etapas pero no seleccionó ninguna pestaña, dejamos la lista vacía
-            lotes = List.of();
-        } else {
-            // COMPORTAMIENTO NORMAL: Loteos sin etapas
-            if (buscar != null && !buscar.isBlank()) {
-                String buscarSql = "%" + buscar.trim().replaceAll("\\s+", "%") + "%";
-                lotes = loteRepository.buscarPorCuentaOTitular(id, buscarSql);
-            } else {
-                lotes = loteRepository.findByLoteoIdLoteo(id);
-            }
-        }
-
-        model.addAttribute("lotes", lotes);
-        model.addAttribute("buscar", buscar != null ? buscar : "");
-
-        // --- ACÁ BUSCAMOS EL LOTE SELECCIONADO PARA EL PANEL ---
-        if (idLoteSeleccionado != null) {
-            Lote loteSeleccionado = loteRepository.findById(idLoteSeleccionado).orElse(null);
-            model.addAttribute("loteSeleccionado", loteSeleccionado);
-        }
-        // -------------------------------------------------------
-        return "cliente/lotes-cliente";
-    }
-
-    @GetMapping("/cliente/loteos/{id}/visor")
-    public String verMapaCliente(
-            @PathVariable("id") Integer id,
-            @RequestParam(value = "idEtapa", required = false) Integer idEtapa, Authentication authentication,
-            Model model) {
-
-        Loteo loteo = loteoRepository.findById(id).orElse(null);
-        
-        // --- CONTROL DE SEGURIDAD ---
-        if (loteo == null) {
-            // Si el loteo no existe, lo mandamos de vuelta al inicio del portal de clientes
-            return "redirect:/cliente/loteos"; 
-        }
-        model.addAttribute("loteo", loteo);
-
+        model.addAttribute("lote", lote);
         List<Etapa> etapas = etapaRepository.findByLoteoIdLoteo(id);
         model.addAttribute("tieneEtapas", !etapas.isEmpty());
-
-        // Mantenemos tu excelente lógica para el JavaScript de Leaflet
-        model.addAttribute("etapaSeleccionada", idEtapa != null ? idEtapa : false);
-
-        boolean esAdmin = false;
-        boolean esCliente = false;
-
-        if (authentication != null) {
-            for (GrantedAuthority authority : authentication.getAuthorities()) {
-                if (authority.getAuthority().equals("ROLE_ADMIN")) {
-                    esAdmin = true;
-                } else if (authority.getAuthority().equals("ROLE_CLIENTE")) {
-                    esCliente = true;
-                }
-            }
-        }
-
-        model.addAttribute("esAdmin", esAdmin);
-        model.addAttribute("esCliente", esCliente);
-        
-        return "lotes/visor";
+        model.addAttribute("etapas", etapas);
     }
 
-    @GetMapping("/cliente/loteos/{id}/datos-mapa")
-    @ResponseBody
-    public List<Lote> obtenerDatosMapaCliente(@PathVariable("id") Integer id) {
-        return loteRepository.findByLoteoIdLoteo(id);
+    private void addValidationErrors(Model model, BindingResult bindingResult) {
+        model.addAttribute("errores", bindingResult.getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.toList()));
     }
 
-    // --- MODIFICAR (Mostrar Formulario) ---
-    @GetMapping("/cliente/lotes/{idLote}/editar")
-    public String mostrarFormularioEditarCliente(
-            @PathVariable("idLote") Integer idLote,
-            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
-            Model model) {
-        Lote lote = loteRepository.findByIdWithLoteo(idLote).orElse(null);
-        if (lote == null) {
-            return "redirect:/";
-        }
-
-        model.addAttribute("lote", lote);
-        model.addAttribute("loteo", lote.getLoteo());
-        model.addAttribute("etapaSeleccionada", idEtapa);
-
-        return "cliente/formulario-cliente-editar-lote";
-    }
-
-    // --- MODIFICAR (Guardar Cambios) ---
-    @PostMapping("/cliente/lotes/{idLote}/editar")
-    public String guardarEdicionCliente(
-            @PathVariable("idLote") Integer idLote, 
-            @RequestParam(value = "titular", required = false) String titular,
-            @RequestParam(value =  "designacionOficial", required = false) String designacionOficial,
-            @RequestParam(value = "observaciones", required = false) String observaciones,
-            @RequestParam(value = "idEtapa", required = false) Integer idEtapa,
-            @RequestParam(value = "cuentaEmos", required = false) String cuentaEmos,
-            @RequestParam(value = "cuentaMuni", required = false) String cuentaMuni,
-            @RequestParam(value = "domicilio", required = false) String domicilio) {
-
-        Lote lote = loteRepository.findByIdWithLoteo(idLote).orElse(null);
-
-        if (lote == null) {
-            // el lote no existe, no hay nada que guardar
-            return "redirect:/cliente/loteos/lotes";
-        }
-
-        lote.setTitular(titular);
-        lote.setDesignacionOficial(designacionOficial);
-        lote.setObservaciones(observaciones);
-        lote.setCuentaEmos(cuentaEmos != null ? cuentaEmos : "-");
-        lote.setCuentaMuni(cuentaMuni != null ? cuentaMuni : "-");
-        lote.setCuentaEmos(cuentaEmos);
-        lote.setCuentaMuni(cuentaMuni);
-        lote.setDomicilio(domicilio != null ? domicilio : "-");
-        
-        loteRepository.save(lote);
-
-        Integer idLoteo = lote.getLoteo().getIdLoteo();
-
-        if (idEtapa != null) {
-            return "redirect:/cliente/loteos/" + idLoteo + "/lotes?idEtapa=" + idEtapa;
-        } else {
-            return "redirect:/cliente/loteos/" + idLoteo + "/lotes";
-        }
-    }
 }
