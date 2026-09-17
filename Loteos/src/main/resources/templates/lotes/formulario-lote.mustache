@@ -15,6 +15,9 @@
                         <h4 class="mb-0">Registrar Lote en: {{loteo.nombre}}</h4>
                     </div>
                     <div class="card-body">
+                        {{#errores}}
+                        <div class="alert alert-danger" role="alert">{{.}}</div>
+                        {{/errores}}
                         <form action="/loteos/{{loteo.idLoteo}}/lotes" method="post">
                             
                             <div class="row mb-3">

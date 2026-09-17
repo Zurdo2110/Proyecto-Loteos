@@ -2,6 +2,8 @@ package com.example.app.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "etapas")
@@ -12,6 +14,8 @@ public class Etapa {
     private Integer idEtapa;
 
     @Column(nullable = false, length = 100)
+    @NotBlank
+    @Size(max = 100)
     private String nombre; // Ej: "Fase 1", "Sector Norte"
 
     @Column(length = 50)

@@ -1,6 +1,8 @@
 package com.example.app.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 
 @Entity
@@ -12,6 +14,8 @@ public class Loteo {
     private Integer idLoteo;
 
     @Column(nullable = false, length = 100)
+    @NotBlank
+    @Size(max = 100)
     private String nombre;
 
     // Relación 1 a N: Un loteo tiene muchos lotes.

@@ -1,6 +1,8 @@
 package com.example.app.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import com.fasterxml.jackson.annotation.JsonIgnore; 
 
 @Entity
@@ -13,6 +15,7 @@ public class Lote {
 
     // Limita la columna a 12 caracteres máximo en la Base de Datos
     @Column(name = "numero_cuenta", nullable = false, length = 12)
+    @NotBlank
     private String numeroCuenta;
 
     // Limita la columna a 16 caracteres máximo en la Base de Datos
@@ -30,10 +33,12 @@ public class Lote {
     private String matricula;
 
     // Superficie total del terreno
+    @PositiveOrZero
     private Double superficie;
 
     // NUEVO: Superficie construida/cubierta
     @Column(name = "superficie_cubierta")
+    @PositiveOrZero
     private Double superficieCubierta;
 
     @Column(name = "cuentaEmos", length = 7)
